@@ -23,7 +23,7 @@ function App() {
         <a href="https://youtube.com" target="_blank">
           <img src={ytLogo} className="logo" alt="Vite logo" />
         </a>
-        <a href="https://datasektionen.com/" target="_blank">
+        <a href="https://www.hitta.se/rasmus+kebert/lule%C3%A5/person/lpxinttu" target="_blank">
           <img src={mutter} className="logo react" alt="React logo" />
         </a>
       </div>
