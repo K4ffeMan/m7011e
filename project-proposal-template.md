@@ -2,7 +2,7 @@
 
 **Course**: Design of Dynamic Web Systems (M7011E)  
 **Team Members**: Viggo Härdelin, Olle Göransson, Rasmus Kebert
-**Date**: [Submission Date]  
+**Date**: Friday, 7 November 2025
 
 ---
 
@@ -28,12 +28,12 @@
 
 **Primary Users**: People who have friends that want to watch youtube videos together (gamers)
 
-**Key User Journey**: Frist user enters website and clicks on "create private room", here the user can click on the invite others button and send it to their friends. When everyone is in the room they can start to send in youtube-url and vote on what to watch. Then there is a wheel that spins and decides what to show based on the weights of the votes. When the video is decided it start to play in the room for everyone that is in there. 
+**Key User Journey**: User enters website and clicks on "create private room", invites friends. When all friends are in room, they can send youtube-urls and vote on them. Lastly the wheel of fortunes will decide based on voting weights and the video selected will be played for everyone in the room. 
 
 ## 4. Technology Stack
 
 **Backend**: [Node.js] with [Express.js] - *Justification: [We have chosen Express.js mainly because of one big reason, this is not a big project on enterprise-level with high demand on maintainability and scalability. Other reasons include the fact that it has an easy learning-curve for beginners (none of us has had any big interaction with node.js frameworks before). All in all, it's lightweight and easy to to use.]*
-**Database**: [PostgreSQL] - *Justification: [PostgreSQL what chosen also mainly because of one big reason, it's versatility. It can be used in so many different ways that is sort of an obvious choice. It has strong consistency and gives us good relational data handling, which means it's very reliable. It will work well with our project data since we need users (maybe even some sort of friends functionality) and "events" (watch-parties). PostgreSQL is so flexible that it's, like I said, an obvious choice]*
+**Database**: [PostgreSQL] - *Justification: [PostgreSQL was chosen also mainly because of one big reason, it's versatility. It can be used in so many different ways that is sort of an obvious choice. It has strong consistency and gives us good relational data handling, which means it's very reliable. It will work well with our project data since we need users (maybe even some sort of friends functionality) and "events" (watch-parties). PostgreSQL is so flexible that it's, like I said, an obvious choice]*
 **Frontend**: [React/Vite/typescript] *[Frontend is re-used from D0018E course, live-updates when saving new code in IDE]*
 **Documentation**: [Swagger] *[We will use Swagger for our API docs, here's why: It has auto-generated and interactive documentation, it has a widely accepted OpenAPI specification, it is the go-to-choice for Node.js with Express.js.]*
 
@@ -42,36 +42,40 @@
 **Architecture Overview**:
 ```mermaid
 graph TD
-    %% User Layer
-    A[User Browser] -->|HTTPS| B[Frontend: React + Vite + TypeScript]
+    %% User Access
+    Browser[User Browser] -->|HTTPS| LB[Load Balancer - Public Entry]
 
-    %% Frontend Layer
-    B -->|REST / WebSocket| C[Backend: Node.js + Express.js]
+    %% TLS Termination
+    LB -->|TLS / HTTPS| ingress[Ingress Controller]
 
-    %% Authentication
-    B -->|OAuth / Token| D[Firebase Authentication]
+        
+    %% Services route to Deployments
+    ingress --> frontend[Frontend Deployment - React Vite TypeScript Docker]
+    ingress --> backend[Backend Deployment - Node.js Express.js Docker]
+    backend -->|SQL Queries| sql[PostgreSQL Deployment - Dockerized]
 
-    %% Backend Layer
-    C -->|SQL Queries| E[(PostgreSQL Database)]
-    C -->|Auth Verification| D
+    %% External Authentication
+    frontend -->|OAuth Redirect or Token| auth[OAuth 2.0 Provider - External]
+    backend -->|Token Verification| auth
+
+    %% TLS Management
+    Cert[Cert Manager - TLS Certificate Automation] --> LB
+    Cert --> ingress
 
     %% Kubernetes Cluster
     subgraph K[Kubernetes Cluster]
-        C
-        E
+        LB
+        ingress
+        frontend
+        backend
+        sql
+        Cert
     end
 
-    %% Cloud Hosting
-    subgraph Cloud[Cloud Hosting / Infrastructure]
-        K
-        D
-    end
-
-    %% Room Interaction (not a subgraph, just logical flow)
-    B -->|Submit / Vote YouTube URLs| C
-    C -->|Update State / Broadcast| B
-    B -->|Synced Video Playback| B2[Other Users in Room]
-
+    %% Application Logic
+    frontend -->|Submit or Vote YouTube URLs| backend
+    backend -->|Update State or Broadcast| frontend
+    frontend -->|Synced Video Playback| B2[Other Users in Room]
 ```
 
 **Microservices Plan**:
@@ -108,12 +112,12 @@ Example of development timeline:
 - **Technical**: Synchronized watching is something that none of us have worked with prevoisuly whitch makes it very hard for us to estimate how long it will take to implement it. Our mitigation for this is that we will start to start to read documentation of this early in the project whitch might make it easier to understand when we implement it down the line. 
 - **Scope**: The biggest scope risk is will be keeping true synchronisation for all viewers. Say user 1 pauses the current video that a group watches, then there will be a short delay before it pauses for everyone else, if the paus is say 200ms then there it will create a 200ms ofsync between them. If the video buffers alot for some or if the video is paused a lot this sync delay can build up to become very annoying. Fixing this issue will most likly be a big issue.
 
-**Fallback Plan**: [Minimum viable features for Grade 3]
+**Fallback Plan**: We will implement everything mentioned above with the exception of watch together feature.
 ## 9. Team Organization
 
-**[Member 1]**: [Primary responsibility area]
-**[Member 2]**: [Primary responsibility area]
-**[Member 3]**: [Primary responsibility area]
+**Rasmus Kebert**: Testing, database
+**Viggo Härdelin**: backend, autentication, security
+**Olle Göransson**: API, backend
 
 ---
 
