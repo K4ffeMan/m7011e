@@ -39,18 +39,46 @@
 ## 5. System Architecture
 
 **Architecture Overview**:
-```
-[Simple diagram showing main components]
-Frontend <-> API <-> Services <-> Database
-                 <-> Auth Service
-                 <-> [Other Services]
+```mermaid
+graph TD
+    %% User Layer
+    A[User Browser] -->|HTTPS| B[Frontend: React + Vite + TypeScript]
+
+    %% Frontend Layer
+    B -->|REST / WebSocket| C[Backend: Node.js + Express.js]
+
+    %% Authentication
+    B -->|OAuth / Token| D[Firebase Authentication]
+
+    %% Backend Layer
+    C -->|SQL Queries| E[(PostgreSQL Database)]
+    C -->|Auth Verification| D
+
+    %% Kubernetes Cluster
+    subgraph K[Kubernetes Cluster]
+        C
+        E
+    end
+
+    %% Cloud Hosting
+    subgraph Cloud[Cloud Hosting / Infrastructure]
+        K
+        D
+    end
+
+    %% Room Interaction (not a subgraph, just logical flow)
+    B -->|Submit / Vote YouTube URLs| C
+    C -->|Update State / Broadcast| B
+    B -->|Synced Video Playback| B2[Other Users in Room]
+
 ```
 
 **Microservices Plan**:
-- **[Service 1]**: [Purpose]
-- **[Service 2]**: [Purpose]
-- **[Service 3]**: [Purpose]
-
+- **User Service**: Handles user registration and login
+- **Room Service**: Create, join, make links and handle rooms
+- **Voting Service**: Counts votes for every video in a room
+- **Watch Service**: Create a simultaneously youtube watching session
+- **Wheel Service**: Handles vote weight and spin of the wheel
 ## 6. Requirements Fulfillment
 
 **Core Requirements**: All REQ1-REQ39 will be implemented through:
@@ -72,7 +100,7 @@ Example of development timeline:
 
 ## 8. Risk Assessment
 **Main Risks**:
-- **Technical**: [One key risk and mitigation]
+- **Technical**: Synchronized watching is something that none of us have worked with prevoisuly whitch makes it very hard for us to estimate how long it will take to implement it. Our mitigation for this is that we will start to start to read documentation of this early in the project whitch might make it easier to understand when we implement it down the line. 
 - **Scope**: [One key risk and mitigation]
 
 **Fallback Plan**: [Minimum viable features for Grade 3]
