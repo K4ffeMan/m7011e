@@ -32,9 +32,10 @@
 
 ## 4. Technology Stack
 
-**Backend**: [Node.js] with [Express.js] - *Justification: [Why?]*
-**Database**: [PostgreSQL] - *Justification: [Why for your data?]*
-**Frontend**: [React/Vite/typescript] *(minimal implementation)*
+**Backend**: [Node.js] with [Express.js] - *Justification: [We have chosen Express.js mainly because of one big reason, this is not a big project on enterprise-level with high demand on maintainability and scalability. Other reasons include the fact that it has an easy learning-curve for beginners (none of us has had any big interaction with node.js frameworks before). All in all, it's lightweight and easy to to use.]*
+**Database**: [PostgreSQL] - *Justification: [PostgreSQL what chosen also mainly because of one big reason, it's versatility. It can be used in so many different ways that is sort of an obvious choice. It has strong consistency and gives us good relational data handling, which means it's very reliable. It will work well with our project data since we need users (maybe even some sort of friends functionality) and "events" (watch-parties). PostgreSQL is so flexible that it's, like I said, an obvious choice]*
+**Frontend**: [React/Vite/typescript] *[Frontend is re-used from D0018E course, live-updates when saving new code in IDE]*
+**Documentation**: [Swagger] *[We will use Swagger for our API docs, here's why: It has auto-generated and interactive documentation, it has a widely accepted OpenAPI specification, it is the go-to-choice for Node.js with Express.js.]*
 
 ## 5. System Architecture
 
