@@ -89,7 +89,7 @@ graph TD
 - Cloud native with Kubernetes deployment with monitoring and docker containerization.
 -  API Design & Communication with the help of RESTful API:s
 -  System Design & Architecture with github repository
--  Security & Ethics with Https for communications and autentication using JWT or OAuth 2.0
+-  Security & Ethics with Https for communications and autentication using OAuth 2.0
 
 **Advanced Feature**: **Option E** - Since we want to have a watch party where every member watches it synchronized. We think that "Live Data Synchronization" is a valid option.
 
