@@ -101,7 +101,7 @@ Example of development timeline:
 ## 8. Risk Assessment
 **Main Risks**:
 - **Technical**: Synchronized watching is something that none of us have worked with prevoisuly whitch makes it very hard for us to estimate how long it will take to implement it. Our mitigation for this is that we will start to start to read documentation of this early in the project whitch might make it easier to understand when we implement it down the line. 
-- **Scope**: [One key risk and mitigation]
+- **Scope**: The biggest scope risk is will be keeping true synchronisation for all viewers. Say user 1 pauses the current video that a group watches, then there will be a short delay before it pauses for everyone else, if the paus is say 200ms then there it will create a 200ms ofsync between them. If the video buffers alot for some or if the video is paused a lot this sync delay can build up to become very annoying. Fixing this issue will most likly be a big issue.
 
 **Fallback Plan**: [Minimum viable features for Grade 3]
 ## 9. Team Organization
