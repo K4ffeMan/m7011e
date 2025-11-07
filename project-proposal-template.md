@@ -79,21 +79,25 @@ graph TD
 - **Voting Service**: Counts votes for every video in a room
 - **Watch Service**: Create a simultaneously youtube watching session
 - **Wheel Service**: Handles vote weight and spin of the wheel
-## 6. Requirements Fulfillment
+
 
 **Core Requirements**: All REQ1-REQ39 will be implemented through:
-- Dynamic content via [specific examples]
-- Microservices architecture with [service breakdown]
+- Full stack implementation through technology stack mentioned above
+- Dynamic content via room list, voting result, wheel spin, watch party
+- Microservices architecture mentioned above
 - Testing strategy achieving 50%+ coverage
-- Kubernetes deployment with monitoring
+- Cloud native with Kubernetes deployment with monitoring and docker containerization.
+-  API Design & Communication with the help of RESTful API:s
+-  System Design & Architecture with github repository
+-  Security & Ethics with Https for communications and autentication using JWT or OAuth 2.0
 
-**Advanced Feature**: **Option [A/B/C/D/E]** - [Brief implementation plan]
+**Advanced Feature**: **Option E** - Since we want to have a watch party where every member watches it synchronized. We think that "Live Data Synchronization" is a valid option.
 
-**Target Grade**: [3/4/5] - *Justification: [Why this target is realistic]*
+**Target Grade**: [3/4] - If we succeed with synchronized watch together we feel like "Live Data Synchronization" is fulfilled
 
 ## 7. Development Plan
 Example of development timeline:
-**Weeks 1-2**: Database schema, basic services, authentication, Kubernetes setup
+**Weeks 1-2**: Database schema, basic services, authentication, Kubernetes setup, Docker containerization, 
 **Weeks 3-4**: Core features, API implementation, CI/CD pipeline
 **Weeks 5-6**: Advanced feature, comprehensive testing, security
 **Weeks 7-8**: Documentation, performance analysis, final polish
