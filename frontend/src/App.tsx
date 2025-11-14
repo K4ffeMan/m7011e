@@ -4,10 +4,9 @@ import mutter from "./assets/TKL.png";
 import ytLogo from "./assets/youtube-logo.png";
 import Header from "./components/header";
 import Room from "./components/room";
+import Login from "./auth/login";
+import Register from "./auth/register";
 import "./App.css";
-
-
-
 
 function App() {
   const [count, setCount] = useState<number>(0);
@@ -29,13 +28,13 @@ function App() {
               <>
                 <h1>Youtube Video Selector</h1>
                 <a href="https://youtube.com" target="_blank">
-                  <img src={ytLogo} className="logo" alt="Vite logo" />
+                  <img src={ytLogo} className="logo" alt="YouTube logo" />
                 </a>
                 <a
                   href="https://www.hitta.se/rasmus+kebert/lule%C3%A5/person/lpxinttu"
                   target="_blank"
                 >
-                  <img src={mutter} className="logo react" alt="React logo" />
+                  <img src={mutter} className="logo react" alt="TKL logo" />
                 </a>
 
                 <div className="card">
@@ -56,8 +55,9 @@ function App() {
             }
           />
 
-          {/* Room route */}
           <Route path="/room/:roomId" element={<Room />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </main>
     </>
