@@ -6,11 +6,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      # host:container
-      # If your final image is nginx serving on port 80:
       - "3000:3000"
     environment:
-      # Adjust this to whatever your frontend expects
       - VITE_API_URL=http://localhost:5000
     networks:
       - app-network
