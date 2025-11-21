@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Routes, Route } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import "./App.css";
 import mutter from "./assets/TKL.png";
 import ytLogo from "./assets/youtube-logo.png";
-import Header from "./components/header";
-import Room from "./components/room";
 import Login from "./auth/login";
 import Register from "./auth/register";
-import "./App.css";
+import Header from "./components/header";
+import Room from "./components/room";
 
 function App() {
   const [count, setCount] = useState<number>(0);
@@ -38,7 +38,7 @@ function App() {
                 </a>
 
                 <div className="card">
-                  <button onClick={() => setCount((c) => c + 1)}>
+                  <button onClick={() => setCount((c) => c + 2)}>
                     count is {count}
                   </button>
 
