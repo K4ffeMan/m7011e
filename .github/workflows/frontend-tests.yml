@@ -68,7 +68,7 @@ jobs:
       # Optional: Upload test results
       - name: Upload pytest results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pytest-results
           path: testing-ci/frontend-tests/html-report/
