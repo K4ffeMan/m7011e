@@ -39,7 +39,7 @@ Mandatory Non-graded checkpoint. Be honest about your progress - we're here to h
   - **Status**: [Not started ]
 
 ### Backend Services
-- [ No microservice implemented, have mainly started with basic things like eslint and prettier format. Will begin with keycloak before        microservices ] Microservices architecture implemented
+- [ No microservice implemented, have mainly started with basic things like eslint and prettier format. Will begin with keycloak before microservices ] Microservices architecture implemented
 
 
 - [Started ] Database deployed and accessible
