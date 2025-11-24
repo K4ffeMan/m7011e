@@ -1,3 +1,4 @@
+```Mermaid
 erDiagram
     USERS {
         int id PK
@@ -19,7 +20,6 @@ erDiagram
         int id PK
         int room_id FK
         int user_id FK
-        timestamp joined_at
     }
 
     VIDEOS {
@@ -35,7 +35,7 @@ erDiagram
         int id PK
         int video_id FK
         int user_id FK
-        int weight
+        int amount
         timestamp created_at
     }
 
@@ -59,3 +59,4 @@ erDiagram
 
     VIDEOS ||--o{ VOTES : has_votes
     VIDEOS ||--o{ WATCH_SESSIONS : played_in
+```
