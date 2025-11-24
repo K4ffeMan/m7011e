@@ -10,7 +10,7 @@ erDiagram
 
     ROOMS {
         int id PK
-        text room_code PK
+        text room_code UK 
         int created_by FK
         timestamp created_at
         boolean active
