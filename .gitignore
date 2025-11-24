@@ -1,9 +1,7 @@
-**/node_modules/
-/testing-ci/__pycache__/
+**/__pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-
 .venv/
-env/
 venv/
+env/
+**/node_modules/
+**/.pytest_cache/
