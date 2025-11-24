@@ -26,11 +26,11 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('10-testing-ci/backend-tests/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('testing-ci/requirements.txt') }}
 
-      # ---------- Install dependencies ----------
+      # ---------- Install Python dependencies ----------
       - name: Install dependencies
-        run: pip install -r 10-testing-ci/backend-tests/requirements.txt
+        run: pip install -r testing-ci/requirements.txt
 
       # ---------- Start backend server ----------
       - name: Start backend server
@@ -40,12 +40,13 @@ jobs:
           npm run dev &
           sleep 5  # wait for server to start
 
-      # ---------- Run backend tests ----------
+      # ---------- Run backend unit tests ----------
       - name: Run backend unit tests
-        run: pytest 10-testing-ci/backend-tests/unit --maxfail=1 --disable-warnings -v
+        run: pytest testing-ci/unit --maxfail=1 --disable-warnings -v
 
+      # ---------- Run backend integration tests ----------
       - name: Run backend integration tests
-        run: pytest 10-testing-ci/backend-tests/integration -v
+        run: pytest testing-ci/integration -v
 
       # ---------- Upload pytest results ----------
       - name: Upload pytest results
@@ -53,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-pytest-results
-          path: 10-testing-ci/backend-tests/html-report/
+          path: testing-ci/html-report/
