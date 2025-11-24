@@ -63,7 +63,7 @@ jobs:
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test_fe.py --headed
+          pytest testing-ci/frontend-tests/test.py --headed
 
       # Optional: Upload test results
       - name: Upload pytest results
