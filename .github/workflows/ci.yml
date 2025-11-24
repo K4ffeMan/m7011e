@@ -41,7 +41,7 @@ jobs:
         run: pip install pytest httpx
 
       - name: Run backend tests
-        run: pytest 10-testing-ci/backend-tests/ -v
+        run: pytest testing-ci/backend-tests/ -v
 
   # ---------- Frontend Playwright Tests ----------
   frontend-tests:
