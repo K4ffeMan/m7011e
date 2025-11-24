@@ -38,7 +38,23 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        run: pip install pytest httpx
+        run: pip install pytest httpx uvicorn fastapi
+
+      - name: Start backend server
+        run: |
+          # Run backend in background
+          nohup uvicorn backend.app:app --host 0.0.0.0 --port 5173 &
+          # Wait until backend is ready
+          n=0
+          until curl -sSf http://localhost:5173/ > /dev/null; do
+            n=$((n+1))
+            if [ $n -gt 10 ]; then
+              echo "Backend failed to start"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "Backend ready"
 
       - name: Run backend tests
         run: pytest testing-ci/backend-tests/ -v
