@@ -1,6 +1,6 @@
 # Mid-term Demo - M7011E
 
-**Group Number**:  7
+**Group Number**: 7
 **Team Members**: Rasmus Kebert, Viggo Härdelin, Olle Göransson,
 **Date**: 24/11-2025
 
