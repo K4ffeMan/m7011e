@@ -1,7 +1,7 @@
 # Mid-term Demo - M7011E
 
 **Group Number**:  
-**Team Members**: Rasmus Kebert, Viggo Härdelin, Olle Göransson 
+**Team Members**: Rasmus Kebert, Viggo Härdelin, Olle Göransson,
 **Date**: 24/11-2025
 
 ---
@@ -24,7 +24,7 @@ Mandatory Non-graded checkpoint. Be honest about your progress - we're here to h
   - **Status**: [ Builds + tests some parts but not all ]
 
 - [ Configured for backend and database, deploying autocmatically for frontend] ArgoCD setup for GitOps deployment (CD)
-  - **Status**: [Not started / Configured / Deploying automatically]
+  - **Status**: [ Configured ]
 ### Kubernetes Deployment
 - [ backend, database, frontend] Services deployed to K3s cluster
   - **Services deployed**: backend, frontend, database
@@ -39,7 +39,7 @@ Mandatory Non-graded checkpoint. Be honest about your progress - we're here to h
   - **Status**: [Not started ]
 
 ### Backend Services
-- [ no microservice implemented] Microservices architecture implemented
+- [ No microservice implemented, have mainly started with basic things like eslint and prettier format. Will begin with keycloak before        microservices ] Microservices architecture implemented
 
 
 - [Started ] Database deployed and accessible
@@ -47,10 +47,10 @@ Mandatory Non-graded checkpoint. Be honest about your progress - we're here to h
   - **Schema**: https://github.com/K4ffeMan/m7011e/blob/main/database/database-schema.md
 
 - [ REST] Inter-service communication method
-  - **Approach**: [REST / Message queue / Mixed / Other]
+  - **Approach**: [Not started]
 
 ### Testing
-- [Not measured yet ] Backend tests written
+- [ Not measured yet ] Backend tests written
   - **Link**: [test files]
   - **Coverage estimate**: [X%] or "Not measured yet"
 
@@ -61,8 +61,8 @@ Mandatory Non-graded checkpoint. Be honest about your progress - we're here to h
   - **Status**: [Basic structure]
 
 ### Security & Auth
-- [Not started ] Keycloak integration status
-  - **Status**: [Not started / In progress / Basic auth working / Full integration]
+- [ Not started ] Keycloak integration status
+  - **Status**: [Not started]
 
 ---
 
