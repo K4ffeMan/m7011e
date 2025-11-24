@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import videosRouter from "./routes/videos";
 
 const app = express();
-const PORT = 5000;
+const PORT = 8000;
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173" })); // allow React dev server

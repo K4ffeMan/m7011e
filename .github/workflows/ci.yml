@@ -24,7 +24,7 @@ jobs:
       - name: Run linter
         run: flake8 .
 
-  # ---------- Backend Python Tests ----------
+  # ---------- Backend Node.js Tests ----------
   backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest
@@ -32,18 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: 3.11
+          node-version: 20
 
-      - name: Install dependencies
-        run: pip install pytest httpx uvicorn fastapi
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
 
       - name: Start backend server
         run: |
-          # Run backend in background
-          nohup uvicorn backend.app:app --host 0.0.0.0 --port 8000 &
+          cd backend
+          npm run dev &  # or "ts-node server.ts" if you don't have a dev script
           # Wait until backend is ready
           n=0
           until curl -sSf http://localhost:8000/ > /dev/null; do
@@ -57,7 +59,10 @@ jobs:
           echo "Backend ready"
 
       - name: Run backend tests
-        run: pytest testing-ci/backend-tests/ -v
+        run: |
+          cd testing-ci/backend-tests
+          npm install # optional if your tests use Node-based scripts
+          npm test    # or "npx jest" / "npx mocha" depending on your backend test setup
 
   # ---------- Frontend Playwright Tests ----------
   frontend-tests:
@@ -81,10 +86,14 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: |
+          cd frontend
+          npm ci
 
       - name: Start Vite frontend
-        run: npm run dev &
+        run: |
+          cd frontend
+          npm run dev &
 
       - name: Wait for frontend
         run: npx wait-on http://localhost:5173
@@ -106,4 +115,4 @@ jobs:
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test_fe.py
+          pytest testing-ci/frontend-tests/test_fe.py --headed
