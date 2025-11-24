@@ -9,18 +9,17 @@ on:
 jobs:
   # ---------- Lint ----------
   lint:
-    name: Lint Code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
-      - name: Install dependencies
+      - name: Install flake8
         run: pip install flake8
       - name: Run linter
-        run: flake8 10-testing-ci/backend-tests
+        run: flake8 .
 
   # ---------- Unit Tests ----------
   unit-tests:
