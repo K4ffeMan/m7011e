@@ -1,0 +1,32 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:${{ github.sha }} .
+
+      - name: Push to registry
+        run: |
+          echo "Push to container registry"
+
+      - name: Deploy to Kubernetes
+        run: |
+          echo "kubectl apply -f k8s/"
+          echo "Deployment successful!"

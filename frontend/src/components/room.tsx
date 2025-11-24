@@ -12,9 +12,16 @@ interface YouTubeEntry {
   url: string;
 }
 
+interface Vote {
+  videoId: string;
+  votes: number;
+}
+
 function Room() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
+  const [votingActive, setVotingActive] = useState(false);
+  const [votes, setVotes] = useState<Record<string, number>>({}); // videoId -> vote count
 
   const [urls, setUrls] = useState<YouTubeEntry[]>([]);
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -38,6 +45,48 @@ function Room() {
 
     fetchVideos();
   }, [roomId]);
+
+  const startVote = async () => {
+  try {
+    await axios.post(`/api/vote/start/${roomId}`);
+    setVotingActive(true);
+    setVotes({});
+    setAlertMessage("Voting started!");
+    setAlertSeverity("info");
+  } catch (err) {
+    setAlertMessage("Failed to start vote");
+    setAlertSeverity("error");
+  }
+};
+
+const castVote = async (videoId: string) => {
+  try {
+    await axios.post(`/api/vote/${roomId}/${videoId}`);
+    setVotes((prev) => ({
+      ...prev,
+      [videoId]: (prev[videoId] || 0) + 1,
+    }));
+  } catch (err) {
+    setAlertMessage("Failed to cast vote");
+    setAlertSeverity("error");
+  }
+};
+
+const endVote = async () => {
+  try {
+    const res = await axios.post(`/api/vote/end/${roomId}`);
+    const winningVideo = res.data.winningVideo; // e.g. {id: string, url: string}
+    setUrls([winningVideo]); // keep only the winning video
+    setVotingActive(false);
+    setVotes({});
+    setAlertMessage("Voting ended! Winning video kept.");
+    setAlertSeverity("success");
+  } catch (err) {
+    setAlertMessage("Failed to end vote");
+    setAlertSeverity("error");
+  }
+};
+
 
   // Copy room link
   const handleCopyLink = () => {
@@ -133,6 +182,13 @@ function Room() {
           Submit
         </Button>
       </form>
+      <div className="voting-controls">
+        {!votingActive ? (
+          <Button variant="contained" onClick={startVote}>Start Vote</Button>
+        ) : (
+          <Button variant="outlined" onClick={endVote}>End Vote</Button>
+        )}
+      </div>
 
       <div className="video-grid">
         {Array.isArray(urls) && urls.length > 0 ? (
@@ -140,6 +196,11 @@ function Room() {
             const embedUrl = toEmbedUrl(entry.url);
             return (
               <div key={entry.id} className="video-card">
+                {votingActive && (
+                <Button onClick={() => castVote(entry.id)}>Vote</Button>
+                  )}
+                  <p>Votes: {votes[entry.id] || 0}</p>
+
                 {embedUrl ? (
                   <iframe
                     src={embedUrl}
