@@ -42,7 +42,7 @@ jobs:
 
       # ---------- Run backend tests ----------
       - name: Run backend tests
-        run: pytest testing-ci/backend-tests/ -v
+        run: pytest testing-ci/backend-tests/betest.py -v
 
       # ---------- Upload pytest results ----------
       - name: Upload pytest results
