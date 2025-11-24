@@ -90,4 +90,4 @@ jobs:
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/fetest.py
+          pytest testing-ci/frontend-tests/test_fe.py
