@@ -43,10 +43,10 @@ jobs:
       - name: Start backend server
         run: |
           # Run backend in background
-          nohup uvicorn backend.app:app --host 0.0.0.0 --port 5000 &
+          nohup uvicorn backend.app:app --host 0.0.0.0 --port 8000 &
           # Wait until backend is ready
           n=0
-          until curl -sSf http://localhost:5173/ > /dev/null; do
+          until curl -sSf http://localhost:8000/ > /dev/null; do
             n=$((n+1))
             if [ $n -gt 10 ]; then
               echo "Backend failed to start"
