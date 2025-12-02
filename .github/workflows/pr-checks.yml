@@ -39,8 +39,6 @@ jobs:
       - name: Run backend unit tests
         run: pytest testing-ci/backend-tests/ --maxfail=1 --disable-warnings -v
 
-      - name: Run backend integration tests
-        run: pytest testing-ci/backend-tests/integration -v
 
       - name: Upload backend pytest results
         if: always()
