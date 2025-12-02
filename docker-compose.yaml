@@ -11,7 +11,28 @@ services:
       - VITE_API_URL=http://localhost:5000
     networks:
       - app-network
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: group7password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
 
 networks:
   app-network:
-
