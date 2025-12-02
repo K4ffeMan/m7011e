@@ -1,0 +1,53 @@
+name: Backend Pytest Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------- Checkout code ----------
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # ---------- Setup Python ----------
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # ---------- Cache dependencies ----------
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('testing-ci/requirements.txt') }}
+
+      # ---------- Install dependencies ----------
+      - name: Install dependencies
+        run: pip install -r testing-ci/requirements.txtport
+
+      # ---------- Start backend server ----------
+      - name: Start backend server
+        run: |
+          cd backend
+          npm install
+          npm run dev &
+          sleep 5  # wait for server to start
+
+      # ---------- Run backend tests ----------
+      - name: Run backend tests
+        run: pytest testing-ci/backend-tests/test_be.py -v
+
+      # ---------- Upload pytest results ----------
+      - name: Upload pytest results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-pytest-results
+          path: testing-ci/backend-tests/html-report/

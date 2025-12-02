@@ -1,0 +1,75 @@
+name: Frontend Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+
+    services:
+      # Optional: if your backend is needed for /api/videos
+      backend:
+        image: node:20
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd "curl --fail http://localhost:3000 || exit 1"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Install Node.js and frontend dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Start frontend server
+      - name: Start Vite frontend
+        run: npm run dev &
+      
+      - name: Wait for frontend to be ready
+        run: |
+          npx wait-on http://localhost:5173
+          
+      # Install Python and dependencies for Playwright
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Install Python dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install pytest pytest-playwright
+
+          # Install browser binaries for Playwright
+          playwright install
+
+      # Run Playwright tests
+      - name: Run frontend tests
+        run: |
+          source .venv/bin/activate
+          pytest testing-ci/frontend-tests/test.py --headed
+
+      # Optional: Upload test results
+      - name: Upload pytest results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: testing-ci/frontend-tests/html-report/
+
