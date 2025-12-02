@@ -98,6 +98,7 @@ jobs:
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
+          export PLAYWRIGHT_HEADLESS=1
           pytest testing-ci/frontend-tests/test_fe.py --browser chromium --headed
 
   # ---------- Ensure all tests must pass ----------
