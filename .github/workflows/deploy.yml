@@ -1,37 +1,24 @@
-name: Deploy to Production
+name: CI Tests
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
 
 jobs:
   test:
-    name: Run CI Tests
-    uses: ./.github/workflows/ci.yml
-
-  deploy:
-    name: Deploy to Kubernetes
+    name: Run Unit Tests
     runs-on: ubuntu-latest
-    needs: test  # Wait for CI tests to pass
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: |
-          docker build -t myapp:${{ github.sha }} .
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-      - name: Push to registry
-        run: |
-          echo "Push to container registry"
-          # Replace with your actual push command, e.g.:
-          # docker tag myapp:${{ github.sha }} myregistry/myapp:${{ github.sha }}
-          # docker push myregistry/myapp:${{ github.sha }}
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Deploy to Kubernetes
-        run: |
-          echo "kubectl apply -f k8s/"
-          # Replace with actual deployment command, e.g.:
-          # kubectl apply -f k8s/deployment.yaml
-          echo "Deployment successful!"
+      - name: Run tests
+        run: pytest testing-ci/backend-tests --maxfail=1 --disable-warnings -v
