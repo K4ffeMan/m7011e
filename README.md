@@ -24,7 +24,7 @@ source ~/.venvs/playwright/bin/activate
 Then it should look something like: (playwright) m7011e >
 Then run:
 ```
-pytest testing-ci/frontend-tests/fetest.py
-pytest testing-ci/backend-tests/betest.py
+pytest testing-ci/frontend-tests/test_fe.py
+pytest testing-ci/backend-tests/test_be.py
 ```
 To test the frontend/backend
