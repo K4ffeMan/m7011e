@@ -98,7 +98,7 @@ jobs:
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test_fe.py --headed
+          pytest testing-ci/frontend-tests/test_fe.py --browser chromium --headed
 
   # ---------- Ensure all tests must pass ----------
   prevent-merge-if-failing:
