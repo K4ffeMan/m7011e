@@ -88,7 +88,7 @@ jobs:
           - 5432:5432
         env:
           POSTGRES_USER: username
-          POSTGRES_PASSWORD: my_username
+          POSTGRES_PASSWORD: my_password
           POSTGRES_DB: mydatabase
         options: >-
           --health-cmd="pg_isready -U postgres"
