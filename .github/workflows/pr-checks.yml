@@ -58,21 +58,44 @@ jobs:
     env:
       PLAYWRIGHT_HEADLESS: 1
       PLAYWRIGHT_BROWSERS_PATH: 0
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: testdb
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=5s 
+          --health-timeout=5s 
+          --health-retries=5
+        
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
+    
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-
-      - name: Start backend for frontend
+        
+      - name: Install backend dependencies
         run: |
           cd backend
           npm ci
+        
+      - name: Start backend
+        run: |
+          cd backend
           npm run dev &
-          echo "Waiting for backend…"
+          echo "Waiting for backend..."
           n=0
           until curl -sSf http://localhost:8000/ > /dev/null; do
             n=$((n+1))
@@ -83,6 +106,7 @@ jobs:
             sleep 2
           done
           echo "Backend up and running"
+        
 
       - name: Install frontend dependencies
         run: |
