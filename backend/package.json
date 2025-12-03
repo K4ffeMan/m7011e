@@ -5,21 +5,36 @@
   "main": "server.ts",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
+    "type-check": "tsc --noEmit",
+    "build": "tsc",
+    "lint": "eslint \"**/*.ts\" --max-warnings=0",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "body-parser": "^1.20.2"
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "typescript": "^5.1.6",
-    "ts-node-dev": "^2.0.0",
-    "@types/node": "^20.4.2",
-    "@types/express": "^4.17.17",
+    "@tsconfig/node22": "^22.0.5",
+    "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.17",
-    "@types/body-parser": "^1.19.2"
+    "@types/express": "^4.17.25",
+    "@types/node": "^20.19.25",
+    "@types/pg": "^8.15.6",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-perfectionist": "^4.15.1",
+    "prettier": "^3.6.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,7 +1,10 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
     "target": "ES2020",                   
     "module": "CommonJS",                 
+    "moduleResolution": "node",
+    "types": ["node"],
     "outDir": "./dist",                     
     "rootDir": "./",                        
     "strict": true,                         
