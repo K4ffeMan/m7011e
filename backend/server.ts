@@ -9,7 +9,7 @@ import videosRouter from "./routes/videos";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 8000;
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173" }));
