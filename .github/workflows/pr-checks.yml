@@ -49,28 +49,34 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: 0
     steps:
       - uses: actions/checkout@v4
-
+    
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-
+        
       - name: Install frontend dependencies
         run: |
           cd frontend
           npm ci
-
+        
       - name: Start frontend server
         run: |
           cd frontend
           npm run dev &
           npx wait-on http://localhost:5173
-
+        
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.13
-
+        
+      - name: Install Chromium dependencies
+        run: sudo apt-get update && sudo apt-get install -y \
+          libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
+          libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
+          libgtk-3-0 libxss1 libxshmfence1 libepoxy0
+        
       - name: Install Python & Playwright dependencies
         run: |
           python -m venv .venv
@@ -78,11 +84,12 @@ jobs:
           pip install --upgrade pip
           pip install pytest pytest-playwright
           playwright install --with-deps
-
+        
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
           pytest testing-ci/frontend-tests/test_fe.py
+
 
   prevent-merge-if-failing:
     runs-on: ubuntu-latest
