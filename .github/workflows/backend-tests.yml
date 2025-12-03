@@ -11,40 +11,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ---------- Checkout code ----------
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # ---------- Setup Python ----------
+      - name: Remove stale backend build files
+        run: |
+          echo "Cleaning old backend builds"
+          rm -rf backend/dist
+          rm -rf backend/build
+          rm -rf backend/out
+          rm -rf backend/db
+          rm -rf backend/*.js
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Start backend server
+        run: |
+          cd backend
+          npm run dev &
+          echo "Waiting for backend to start..."
+
+          # Wait for server to respond instead of fixed sleep
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/ > /dev/null; then
+              echo "Backend is up!"
+              break
+            fi
+            sleep 1
+          done
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      # ---------- Cache dependencies ----------
       - name: Cache pip
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('testing-ci/requirements.txt') }}
 
-      # ---------- Install dependencies ----------
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: pip install -r testing-ci/requirements.txt
 
-      # ---------- Start backend server ----------
-      - name: Start backend server
-        run: |
-          cd backend
-          npm install
-          npm run dev &
-          sleep 5  # wait for server to start
-
-      # ---------- Run backend tests ----------
       - name: Run backend tests
         run: pytest testing-ci/backend-tests/test_be.py -v
 
-      # ---------- Upload pytest results ----------
       - name: Upload pytest results
         if: always()
         uses: actions/upload-artifact@v4

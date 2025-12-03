@@ -10,25 +10,35 @@ jobs:
   test-frontend:
     runs-on: ubuntu-latest
 
+    env:
+      BACKEND_URL: http://localhost:8000
+      PLAYWRIGHT_HEADLESS: 1
+      PLAYWRIGHT_BROWSERS_PATH: 0
+
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Nodes
+
       - name: Start database
         run: |
           cd database
           docker compose up -d
-          echo "Waiting for database…"
-          sleep 10
+          echo "Waiting for PostgreSQL..."
+          for i in {1..20}; do
+            if docker compose exec -T database pg_isready; then
+              echo "Database ready!"
+              break
+            fi
+            sleep 2
+          done
 
-      # Nodes
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Backend
+
       - name: Install backend dependencies
         run: |
           cd backend
@@ -39,18 +49,15 @@ jobs:
           cd backend
           npm run dev &
           echo "Waiting for backend…"
-          n=0
-          until curl -sSf http://localhost:8000/ > /dev/null; do
-            n=$((n+1))
-            if [ $n -gt 20 ]; then
-              echo "Backend failed to start"
-              exit 1
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8000/ > /dev/null; then
+              echo "Backend up!"
+              break
             fi
             sleep 2
           done
-          echo "Backend up and running"
 
-      # Frontend
+
       - name: Install frontend dependencies
         run: |
           cd frontend
@@ -62,31 +69,35 @@ jobs:
           npm run dev &
 
       - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:5173
+        run: |
+          echo "Waiting for Vite dev server..."
+          npx wait-on http://localhost:5173
 
-      # Playwright
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13
+          python-version: 3.11   # stable, fully supported version
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies + Playwright browsers
         run: |
           python -m venv .venv
           source .venv/bin/activate
+
           pip install --upgrade pip
           pip install pytest pytest-playwright
-          playwright install
 
-    # Test
+          # Install Chromium + Linux deps
+          playwright install --with-deps chromium
+
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test.py --headed
+          pytest testing-ci/frontend-tests/test.py -v
+
 
       - name: Upload pytest results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-results
+          name: frontend-test-results
           path: testing-ci/frontend-tests/html-report/
