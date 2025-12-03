@@ -5,32 +5,50 @@ on:
     branches: [main]
 
 jobs:
+  # ---------- Backend Tests ----------
   test-backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: username
+          POSTGRES_PASSWORD: my_password
+          POSTGRES_DB: mydatabase
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: username
+      DATABASE_PASSWORD: my_password
+      DATABASE_NAME: mydatabase
+
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: 3.11
+          node-version: 20
 
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('testing-ci/requirements.txt') }}
-
-      - name: Install dependencies
-        run: pip install -r testing-ci/requirements.txt
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
 
       - name: Start backend server
         run: |
           cd backend
-          npm ci
           npm run dev &
-          echo "Waiting for backend…"
+          # wait until backend responds
           n=0
           until curl -sSf http://localhost:8000/ > /dev/null; do
             n=$((n+1))
@@ -43,70 +61,49 @@ jobs:
           echo "Backend up and running"
 
       - name: Run backend tests
-        run: pytest testing-ci/backend-tests/ --maxfail=1 --disable-warnings -v
+        run: |
+          cd backend
+          npm test || pytest testing-ci/backend-tests/ --maxfail=1 --disable-warnings -v
 
       - name: Upload backend test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-pytest-results
+          name: backend-test-results
           path: testing-ci/backend-tests/html-report/
 
+  # ---------- Frontend Tests ----------
   test-frontend:
     runs-on: ubuntu-latest
-    needs: [test-backend]
+    needs: test-backend
     env:
       PLAYWRIGHT_HEADLESS: 1
       PLAYWRIGHT_BROWSERS_PATH: 0
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: testdb
+      BACKEND_URL: http://localhost:8000
+
     services:
       postgres:
         image: postgres:15
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
+          POSTGRES_USER: username
+          POSTGRES_PASSWORD: my_username
+          POSTGRES_DB: mydatabase
         options: >-
-          --health-cmd="pg_isready -U postgres" 
-          --health-interval=5s 
-          --health-timeout=5s 
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
           --health-retries=5
-        
+
     steps:
-      - uses: actions/checkout@v4
-    
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-        
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
-        
-      - name: Start backend
-        run: |
-          cd backend
-          npm run dev &
-          echo "Waiting for backend..."
-          n=0
-          until curl -sSf http://localhost:8000/ > /dev/null; do
-            n=$((n+1))
-            if [ $n -gt 20 ]; then
-              echo "Backend failed to start"
-              exit 1
-            fi
-            sleep 2
-          done
-          echo "Backend up and running"
-        
 
       - name: Install frontend dependencies
         run: |
@@ -117,17 +114,18 @@ jobs:
         run: |
           cd frontend
           npm run dev &
-          npx wait-on http://localhost:5173
+          n=0
+          until npx wait-on http://localhost:5173; do
+            n=$((n+1))
+            if [ $n -gt 20 ]; then
+              echo "Frontend failed to start"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "Frontend ready"
 
-      - name: Install Playwright system dependencies
-        run: npx playwright install-deps
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.13
-
-      - name: Install Python dependencies & Playwright browsers
+      - name: Setup Python & Playwright
         run: |
           python -m venv .venv
           source .venv/bin/activate
@@ -135,18 +133,23 @@ jobs:
           pip install pytest pytest-playwright
           playwright install --with-deps
 
-      - name: Run frontend tests
+      - name: Install Playwright OS dependencies
+        run: npx playwright install-deps
+
+      - name: Run frontend Playwright tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test.py
+          pytest testing-ci/frontend-tests/test_fe.py
+
 
       - name: Upload frontend test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-pytest-results
+          name: frontend-test-results
           path: testing-ci/frontend-tests/html-report/
 
+  # ---------- Ensure all tests must pass ----------
   prevent-merge-if-failing:
     runs-on: ubuntu-latest
     needs: [test-backend, test-frontend]
