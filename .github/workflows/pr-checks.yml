@@ -8,7 +8,8 @@ jobs:
   test-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -27,14 +28,24 @@ jobs:
       - name: Start backend server
         run: |
           cd backend
-          npm install
+          npm ci
           npm run dev &
-          sleep 10  # wait for server to be ready
+          echo "Waiting for backend…"
+          n=0
+          until curl -sSf http://localhost:8000/ > /dev/null; do
+            n=$((n+1))
+            if [ $n -gt 20 ]; then
+              echo "Backend failed to start"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "Backend up and running"
 
-      - name: Run backend unit tests
+      - name: Run backend tests
         run: pytest testing-ci/backend-tests/ --maxfail=1 --disable-warnings -v
 
-      - name: Upload backend pytest results
+      - name: Upload backend test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -48,48 +59,69 @@ jobs:
       PLAYWRIGHT_HEADLESS: 1
       PLAYWRIGHT_BROWSERS_PATH: 0
     steps:
-      - uses: actions/checkout@v4
-    
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-        
+
+      - name: Start backend for frontend
+        run: |
+          cd backend
+          npm ci
+          npm run dev &
+          echo "Waiting for backend…"
+          n=0
+          until curl -sSf http://localhost:8000/ > /dev/null; do
+            n=$((n+1))
+            if [ $n -gt 20 ]; then
+              echo "Backend failed to start"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "Backend up and running"
+
       - name: Install frontend dependencies
         run: |
           cd frontend
           npm ci
-        
+
       - name: Start frontend server
         run: |
           cd frontend
           npm run dev &
           npx wait-on http://localhost:5173
-        
+
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.13
-        
-      - name: Install Chromium dependencies
-        run: sudo apt-get update && sudo apt-get install -y \
-          libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
-          libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
-          libgtk-3-0 libxss1 libxshmfence1 libepoxy0
-        
-      - name: Install Python & Playwright dependencies
+
+      - name: Install Python dependencies & Playwright browsers
         run: |
           python -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
           pip install pytest pytest-playwright
           playwright install --with-deps
-        
+
       - name: Run frontend tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test_fe.py
+          pytest testing-ci/frontend-tests/test.py
 
+      - name: Upload frontend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-pytest-results
+          path: testing-ci/frontend-tests/html-report/
 
   prevent-merge-if-failing:
     runs-on: ubuntu-latest
