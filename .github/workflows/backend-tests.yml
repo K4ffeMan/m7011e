@@ -9,6 +9,8 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+    container:
+      image: node:20-alpine
 
     steps:
       - name: Checkout repo

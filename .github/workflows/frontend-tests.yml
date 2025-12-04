@@ -76,7 +76,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11   # stable, fully supported version
+          python-version: 3.11   
 
       - name: Install Python dependencies + Playwright browsers
         run: |
