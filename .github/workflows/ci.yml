@@ -127,7 +127,8 @@ jobs:
       - name: Run frontend Playwright tests
         run: |
           source .venv/bin/activate
-          pytest testing-ci/frontend-tests/test_fe.py --headed
+          export PLAYWRIGHT_HEADLESS=1
+          pytest testing-ci/frontend-tests/test_fe.py
 
       - name: Upload frontend test results
         if: always()
