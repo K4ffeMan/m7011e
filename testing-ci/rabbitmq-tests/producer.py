@@ -29,7 +29,7 @@ try:
 except Exception as e:
     print(f"[Producer] ERROR: Could not connect to RabbitMQ: {e}")
     print(f"[Producer] Make sure RabbitMQ is running and accessible at {RABBITMQ_HOST}")
-    print(f"[Producer] If testing locally, run: kubectl port-forward -n rabbitmq svc/rabbitmq-service-api 5672:5672")
+    print("[Producer] If testing locally, run: kubectl port-forward -n rabbitmq svc/rabbitmq-service-api 5672:5672")
     sys.exit(1)
 
 # Declare a durable queue (survives RabbitMQ restart)
@@ -57,4 +57,4 @@ for i in range(1, 6):
 
 connection.close()
 print(f"\n[Producer] Done! Sent 5 messages to queue '{queue_name}'")
-print(f"[Producer] Run 'python consumer_simple.py' to process these messages")
+print("[Producer] Run 'python consumer_simple.py' to process these messages")

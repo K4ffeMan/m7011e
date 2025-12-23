@@ -30,7 +30,7 @@ try:
 except Exception as e:
     print(f"[Consumer] ERROR: Could not connect to RabbitMQ: {e}")
     print(f"[Consumer] Make sure RabbitMQ is running and accessible at {RABBITMQ_HOST}")
-    print(f"[Consumer] If testing locally, run: kubectl port-forward -n rabbitmq svc/rabbitmq-service-api 5672:5672")
+    print("[Consumer] If testing locally, run: kubectl port-forward -n rabbitmq svc/rabbitmq-service-api 5672:5672")
     sys.exit(1)
 
 queue_name = 'test_queue'
@@ -51,7 +51,8 @@ def callback(ch, method, properties, body):
 
     # Send acknowledgment - VERY IMPORTANT!
     ch.basic_ack(delivery_tag=method.delivery_tag)
-    print(f"[Consumer] Sent ACK to RabbitMQ\n")
+    print("[Consumer] Sent ACK to RabbitMQ\n")
+
 
 # Start consuming with manual acknowledgment
 channel.basic_consume(
