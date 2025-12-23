@@ -10,7 +10,7 @@ cd frontend
 npm run dev
 ``` 
 
-## Tesing the project 
+## Testing the project 
 Start frontend/backend:
 ```
 /frontend npm run dev
