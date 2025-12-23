@@ -21,3 +21,4 @@ def page(context):
     page = context.new_page()
     yield page
     page.close()
+    
