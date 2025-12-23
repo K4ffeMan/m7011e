@@ -28,3 +28,10 @@ pytest testing-ci/frontend-tests/test_fe.py
 pytest testing-ci/backend-tests/test_be.py
 ```
 To test the frontend/backend
+
+# keycloak
+For running locally:
+Easiest way is with docker
+docker compose up --build in root folder
+
+The login and register button is now connected to keycloaks register and login. This ensures that we take full advantage of keycloak, since they do every login for us and gives a jws token back.
