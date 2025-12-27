@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./room.css";
 
 interface YouTubeEntry {
@@ -12,10 +12,12 @@ interface YouTubeEntry {
   url: string;
 }
 
+/*
 interface Vote {
   videoId: string;
   votes: number;
 }
+*/
 
 function Room() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -70,7 +72,7 @@ function Room() {
       setAlertSeverity("error");
     }
   };
-
+/*
   const endVote = async () => {
     try {
       const res = await axios.post(`/api/vote/end/${roomId}`);
@@ -85,7 +87,7 @@ function Room() {
       setAlertSeverity("error");
     }
   };
-
+*/
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setAlertMessage("Room link copied!");
