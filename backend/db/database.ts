@@ -17,21 +17,62 @@ export async function testConnection() {
   }
 }
 
-export async function createUsersTable() {
-  const query = 
-    `CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      username VARCHAR(50) UNIQUE NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      password VARCHAR(200) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
-  ;
+export async function createTablesWatch() {
 
-  try {
-    await pool.query(query);
-    console.log("Users table ready");
-  } catch (error) {
-    console.error("Failed to create users table", error);
-  }
-}
+  const userQuery = 
+    `CREATE TABLE IF NOT EXISTS watch.users (
+    id TEXT PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );`
+  await pool.query(userQuery);
+
+  const roomQuery = 
+    `CREATE TABLE IF NOT EXISTS watch.rooms (
+    id TEXT PRIMARY KEY,
+    owner_id TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id)
+      REFERENCES watch.users(id)
+      ON DELETE CASCADE
+    );`
+  await pool.query(roomQuery);
+
+  const videoQuery = 
+    `CREATE TABLE IF NOT EXISTS watch.videos (
+    id SERIAL PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (room_id)
+      REFERENCES watch.rooms(id)
+      ON DELETE CASCADE
+    );`
+  await pool.query(videoQuery);
+
+  const voteQuery = 
+    `CREATE TABLE IF NOT EXISTS watch.votes (
+    id SERIAL PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    video_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (room_id)
+      REFERENCES watch.rooms(id)
+      ON DELETE CASCADE,
+
+    FOREIGN KEY (video_id)
+      REFERENCES watch.videos(id)
+      ON DELETE CASCADE,
+
+    FOREIGN KEY (user_id)
+      REFERENCES watch.users(id)
+      ON DELETE CASCADE,
+
+    UNIQUE (room_id, user_id)
+    );`
+  await pool.query(voteQuery);
+};
+
