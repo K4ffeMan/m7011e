@@ -1,23 +1,28 @@
+import dotenv from "dotenv";
 import { Pool } from "pg";
+
+dotenv.config();
 
 export const pool = new Pool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT) || 5432,
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  password: String(process.env.DB_PASSWORD),
   database: process.env.DB_NAME,
 });
 
 export async function testConnection() {
   try {
-    const res = await pool.query("SELECT NOW()");
-    console.log("Connected to PostgreSQL at:", res.rows[0].now);
+    console.log("Connected to PostgreSQL");
   } catch (error) {
     console.error("PostgreSQL connection failed:", error);
   }
 }
 
 export async function createTablesWatch() {
+  const schemaQuery = 
+    `CREATE SCHEMA IF NOT EXISTS watch;`
+  await pool.query(schemaQuery);
 
   const userQuery = 
     `CREATE TABLE IF NOT EXISTS watch.users (

@@ -11,11 +11,20 @@ npm run dev
 ``` 
 
 ## Testing the project 
-Start frontend/backend:
+Run docker compose for the parts. Most commonly for database or/and backend
 ```
-/frontend npm run dev
-/backend npm run dev
+docker compose up --build
 ```
+or
+```
+docker compose up postgres
+```
+in backend
+```
+npm run dev
+```
+
+
 
 Enter venv mode
 ```
