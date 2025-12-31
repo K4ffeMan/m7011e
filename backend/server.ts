@@ -1,10 +1,10 @@
 import bodyParser from "body-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import endVotesRouter from "./routes/endVote";
 import roomsrouter from "./routes/rooms";
 import startVotesRouter from "./routes/startVote";
+import { createTablesWatch, testConnection } from "./db/database";
 import videosRouter from "./routes/videos";
 import votesRouter from "./routes/votes";
 
@@ -37,7 +37,19 @@ app.use("/api/rooms", roomsrouter);
 app.use("/api/vote", votesRouter);
 
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+async function startserver() {
+  try{
+    await testConnection();
+    await createTablesWatch();
+
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }catch(err){
+    console.log("Something went wrong")
+    process.exit(1);
+  }
+}
+
+startserver();
+
