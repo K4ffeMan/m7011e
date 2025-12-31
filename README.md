@@ -64,3 +64,9 @@ python producer.py
 ```
 
 When using rabbitmq for backend when running inside kubernetess, we change 'localhost' to rabbitmq-service-api
+## How CI and workflow works 
+
+Currently the CI runs on ubuntu (which is slow). The reason why we currently do not run tests inside a custom alpine docker image is because playwright does not have official support for running alpine linux since it uses glibc while alpine uses libc which are incompatible. There are workarounds for this that we might explore later. 
+
+
+How it works now is that the CI starts running the lint which pulls the the repository, setups python and then install flak8 (python linter) and then runs flake8 in the entire repository. 
