@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     env:
-      BASE_URL: http://localhost:8000
+      BASE_URL: http://localhost:5000
 
     steps:
       - uses: actions/checkout@v4
