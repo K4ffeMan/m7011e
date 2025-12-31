@@ -147,7 +147,14 @@ function Room() {
       const res = await axios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
       if (res.data.success) {
         
-        setUrls((prev) => [...prev, { id: res.data.video.id, url: youtubeUrl }]);
+        setUrls((prev) => [
+          ...prev,
+          {
+            id: res.data.video.id,
+            url: youtubeUrl,
+            votes: 0,
+          },
+        ]);
         setYoutubeUrl("");
         setAlertMessage("Video added successfully!");
         setAlertSeverity("success");
