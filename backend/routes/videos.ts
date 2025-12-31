@@ -6,7 +6,12 @@ const router = Router();
 // GET videos for a room
 router.get("/:roomId", (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-  res.json(rooms[roomId].videos || []);
+
+  if(!rooms[roomId]){
+    return res.status(404).json({ error: "No room found" });
+  }
+
+  res.json(rooms[roomId].videos);
 });
 
 

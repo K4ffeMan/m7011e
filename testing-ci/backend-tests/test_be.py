@@ -23,9 +23,6 @@ def stop_server(proc):
     proc.terminate()
     proc.wait()
 
-def getNewRoomId():
-    return str(uuid.uuid4())[:6]
-
 
 @pytest.fixture(scope="session", autouse=True)
 def backend_server():
@@ -33,15 +30,19 @@ def backend_server():
     yield  # tests run here
     stop_server(proc)
 
+def test_make_room():
+    r = httpx.post(f"{BASE_URL}/api/rooms/")
+    assert r.status_code == 201
+    return r.json()["roomId"]
 
 def test_get_videos_initially_empty():
-    room_id = getNewRoomId()
+    room_id = test_make_room()
     r = httpx.get(f"{BASE_URL}/api/videos/{room_id}")
     assert r.status_code == 200
     assert r.json() == []
 
 def test_post_video_adds_video():
-    room_id = getNewRoomId()
+    room_id = test_make_room()
     video_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     post_res = httpx.post(f"{BASE_URL}/api/videos/{room_id}", json={"url": video_url})
     assert post_res.status_code == 200
@@ -56,14 +57,14 @@ def test_post_video_adds_video():
     assert get_res.json()[0]["url"] == video_url
 
 def test_post_video_missing_url_returns_400():
-    room_id = getNewRoomId()
+    room_id = test_make_room()
     r = httpx.post(f"{BASE_URL}/api/videos/{room_id}", json={})
     assert r.status_code == 400
     assert r.json()["error"] == "Missing URL"
 
 @pytest.mark.xfail(reason="Deliberate fail: expects 1 video in empty room")
 def test_get_videos_returns_one_even_empty():
-    room_id = getNewRoomId()
+    room_id = test_make_room()
     r = httpx.get(f"{BASE_URL}/api/videos/{room_id}")
     assert r.status_code == 200
     # This assertion is intentionally wrong
@@ -71,7 +72,7 @@ def test_get_videos_returns_one_even_empty():
 
 @pytest.mark.xfail(reason="Deliberate fail: asserting wrong URL")
 def test_post_video_adds_wrong_url():
-    room_id = getNewRoomId()
+    room_id = test_make_room()
     video_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     post_res = httpx.post(f"{BASE_URL}/api/videos/{room_id}", json={"url": video_url})
     assert post_res.status_code == 200
