@@ -1,11 +1,21 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { useState } from "react";
+import { FaGithub } from "react-icons/fa";
 import "./header.css";
 
-import { FaGithub } from "react-icons/fa"; // FontAwesome GitHub icon
+interface HeaderProps {
+  authenticated: boolean;
+  onLogin: () => void;
+  onRegister: () => void;
+  onLogout: () => void;
+}
 
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({
+  authenticated,
+  onLogin,
+  onRegister,
+  onLogout,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -22,25 +32,34 @@ const Header: React.FC = () => {
 
       {/* Right: Auth Buttons */}
       <div className="header__auth">
-        <Link to="/login" className="login">
-          Log In
-        </Link>
-        <Link to="/register" className="register">
-          Register
-        </Link>
+        {!authenticated ? (
+          <>
+            <button className="login" onClick={onLogin}>
+              Log In
+            </button>
+            <button className="register" onClick={onRegister}>
+              Register
+            </button>
+          </>
+        ) : (
+          <button className="logout" onClick={onLogout}>
+            Logout
+          </button>
+        )}
       </div>
 
-      {/* Optional dropdown */}
+      {/* Dropdown */}
       {isOpen && (
         <div className="header__dropdown">
-          <Link to="/" onClick={toggleMenu}>
-            Home
-          </Link>
-          <Link to="https://github.com/K4ffeMan/m7011e" onClick={toggleMenu}>
-            Github 
-             <FaGithub className="text-gray-700" />
-          </Link>
-          
+          <a href="/" onClick={toggleMenu}>Home</a>
+          <a
+            href="https://github.com/K4ffeMan/m7011e"
+            target="_blank"
+            rel="noreferrer"
+            onClick={toggleMenu}
+          >
+            Github <FaGithub />
+          </a>
         </div>
       )}
     </header>

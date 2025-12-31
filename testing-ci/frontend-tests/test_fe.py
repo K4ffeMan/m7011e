@@ -160,4 +160,4 @@ def test_room_with_failed_video_fetch(page: Page):
         headers={"Content-Type": "application/json"}
     ))
     page.goto(f"{BASE_URL}/room/{room_id}")
-    expect(page.get_by_text("Failed to load videos", exact=True)).to_be_visible()
+    expect(page.get_by_role("alert")).to_contain_text("Failed to load videos")

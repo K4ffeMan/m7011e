@@ -11,13 +11,11 @@ interface YouTubeEntry {
   id: string;
   url: string;
 }
-
 /*
 interface Vote {
   videoId: string;
   votes: number;
-}
-*/
+}*/
 
 function Room() {
   const { roomId } = useParams<{ roomId: string }>();
