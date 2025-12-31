@@ -1,3 +1,4 @@
+import axios from "axios";
 import Keycloak from 'keycloak-js';
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
@@ -35,7 +36,6 @@ function App() {
 
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const keycloak = getKeycloak();
 
@@ -66,9 +66,18 @@ function App() {
     });
   }, []);
 
-  const goToRandomRoom = (): void => {
-    const randomId = Math.random().toString(36).substring(2, 8);
-    navigate(`/room/${randomId}`);
+  const goToRandomRoom = async (): Promise<void> => {
+    
+    try {
+      const res = await axios.post(`/api/rooms/`);
+      if (res.data.success) {
+        navigate(`/room/${res.data.roomId}`);
+      }
+    } catch {
+      setAlertMessage("Failed to create a room");
+      setAlertSeverity("error");
+    }
+    
   };
 
     const handleLogin = () => {
@@ -145,3 +154,19 @@ function App() {
 }
 
 export default App;
+function setUrls(arg0: (prev: any) => any[]) {
+  throw new Error("Function not implemented.");
+}
+
+function setYoutubeUrl(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+
+function setAlertMessage(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+
+function setAlertSeverity(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+

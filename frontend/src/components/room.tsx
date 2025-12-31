@@ -4,30 +4,32 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Wheel } from "react-custom-roulette";
 import { useNavigate, useParams } from "react-router-dom";
 import "./room.css";
+
 
 interface YouTubeEntry {
   id: string;
   url: string;
-}
-/*
-interface Vote {
-  videoId: string;
   votes: number;
-}*/
+}
 
 function Room() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const [votingActive, setVotingActive] = useState(false);
-  const [votes, setVotes] = useState<Record<string, number>>({});
+  const [voteEnded, setVoteEnded] = useState(false);
   const [urls, setUrls] = useState<YouTubeEntry[]>([]);
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [winner, setWinner] = useState<YouTubeEntry | null>(null);
+  const [spinning, setSpinning] = useState(false);
+  const [winningIndex, setWinningIndex] = useState(0);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertSeverity, setAlertSeverity] = useState<
     "success" | "info" | "warning" | "error"
   >("success");
+
 
   // Fetch videos
   useEffect(() => {
@@ -47,9 +49,9 @@ function Room() {
 
   const startVote = async () => {
     try {
-      await axios.post(`/api/vote/start/${roomId}`);
-      setVotingActive(true);
-      setVotes({});
+      const res = await axios.post(`/api/vote/start/${roomId}`);
+      setVotingActive(res.data.votingActive);
+      setVoteEnded(false);
       setAlertMessage("Voting started!");
       setAlertSeverity("info");
     } catch {
@@ -60,24 +62,27 @@ function Room() {
 
   const castVote = async (videoId: string) => {
     try {
-      await axios.post(`/api/vote/${roomId}/${videoId}`);
-      setVotes((prev) => ({
-        ...prev,
-        [videoId]: (prev[videoId] || 0) + 1,
-      }));
+      const res = await axios.post(`/api/vote/${roomId}/${videoId}`);
+      
+      setUrls(prev =>
+      prev.map(video =>
+        video.id === videoId
+          ? { ...video, votes: res.data.votes }
+          : video
+      )
+    );
     } catch {
       setAlertMessage("Failed to cast vote");
       setAlertSeverity("error");
     }
   };
-/*
+
   const endVote = async () => {
     try {
       const res = await axios.post(`/api/vote/end/${roomId}`);
-      const winningVideo = res.data.winningVideo;
-      setUrls([winningVideo]);
-      setVotingActive(false);
-      setVotes({});
+      setVotingActive(res.data.votingActive);
+      setUrls(res.data.videos);
+      setVoteEnded(true);
       setAlertMessage("Voting ended! Winning video kept.");
       setAlertSeverity("success");
     } catch {
@@ -85,7 +90,30 @@ function Room() {
       setAlertSeverity("error");
     }
   };
-*/
+
+
+  const spinWheel = () => {
+    const weightedList: number[] = [];
+
+    urls.forEach((video, index) => {
+      const voteCount = video.votes || 1; // fallback
+      for (let i = 0; i < voteCount; i++) {
+        weightedList.push(index);
+      }
+    });
+
+    if (weightedList.length === 0) return;
+
+    const randomIndex =
+      weightedList[Math.floor(Math.random() * weightedList.length)];
+
+    setWinningIndex(randomIndex);
+    setSpinning(true);
+  };
+
+
+
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setAlertMessage("Room link copied!");
@@ -118,6 +146,7 @@ function Room() {
     try {
       const res = await axios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
       if (res.data.success) {
+        
         setUrls((prev) => [...prev, { id: res.data.video.id, url: youtubeUrl }]);
         setYoutubeUrl("");
         setAlertMessage("Video added successfully!");
@@ -130,7 +159,12 @@ function Room() {
   };
 
   const goHome = () => navigate("/");
-
+  
+  const wheelData = urls.flatMap((video) =>
+    Array(video.votes || 1).fill({
+      option: video.id,
+    })
+  );
   return (
     <div className="room-container">
       <Button
@@ -200,7 +234,7 @@ function Room() {
       )}
 
       <div className="voting-buttons" style={{ marginBottom: "1rem" }}>
-        {!votingActive && urls.length > 0 && (
+        {!votingActive && urls.length > 0 && !voteEnded &&(
           <Button
             variant="contained"
             color="primary"
@@ -208,6 +242,18 @@ function Room() {
             data-testid="start-vote-button"
           >
             Start Vote
+          </Button>
+        )}
+
+        {votingActive && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={endVote}
+            data-testid="end-vote-button"
+            style={{ marginLeft: "1rem" }}
+          >
+            End Vote
           </Button>
         )}
       </div>
@@ -218,16 +264,6 @@ function Room() {
             const embedUrl = toEmbedUrl(entry.url);
             return (
               <div key={entry.id} className="video-card">
-                {votingActive && (
-                  <Button
-                    onClick={() => castVote(entry.id)}
-                    data-testid={`vote-button-${entry.id}`}
-                  >
-                    Vote
-                  </Button>
-                )}
-                <p>Votes: {votes[entry.id] || 0}</p>
-
                 {embedUrl ? (
                   <iframe
                     src={embedUrl}
@@ -238,7 +274,18 @@ function Room() {
                 ) : (
                   <p>Invalid URL</p>
                 )}
+
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => castVote(entry.id)}
+                  disabled={!votingActive}
+                  data-testid={`vote-button-${entry.id}`}
+                >
+                  👍 {entry.votes}
+                </Button>
               </div>
+
             );
           })
         ) : (
@@ -247,6 +294,43 @@ function Room() {
           </p>
         )}
       </div>
+      {!votingActive && urls.length > 0 && !winner && voteEnded &&(
+        <Button
+          variant="contained"
+          color="success"
+          onClick={spinWheel}
+          style={{ marginTop: "1rem" }}
+          disabled={spinning}
+        >
+          {spinning ? "Spinning..." : "Spin the Wheel 🎡"}
+        </Button>
+      )}
+
+      {voteEnded && (
+        <Wheel
+          mustStartSpinning={spinning}
+          prizeNumber={winningIndex}
+          data={wheelData}
+          backgroundColors={["#3e3e3e", "#df3428"]}
+          textColors={["#ffffff"]}
+          onStopSpinning={() => {
+            setSpinning(false);
+            setWinner(urls[winningIndex]);
+          }}
+        />
+      )}
+
+      {winner && (
+        <div style={{ marginTop: "2rem", textAlign: "center" }}>
+          <h2>🎉 Winning Video 🎉</h2>
+          <iframe
+            src={toEmbedUrl(winner.url)!}
+            width="560"
+            height="315"
+            allowFullScreen
+          />
+        </div>
+      )}
     </div>
   );
 }
