@@ -1,5 +1,9 @@
 name: CI Pipeline
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   pull_request:
     branches: [main]
@@ -135,3 +139,56 @@ jobs:
         with:
           name: frontend-test-results
           path: testing-ci/frontend-tests/html-report/
+  
+  docker-backend:
+    name: Build & push backend Docker image
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t ghcr.io/k4ffeman/backend:latest \
+            ./backend
+
+      - name: Push backend image
+        run: |
+          docker push ghcr.io/k4ffeman/backend:latest
+
+  docker-frontend:
+    name: Build & push frontend Docker image
+    runs-on: ubuntu-latest
+    needs: frontend-tests  
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t ghcr.io/k4ffeman/frontend:latest \
+            ./frontend
+
+      - name: Push frontend image
+        run: |
+          docker push ghcr.io/k4ffeman/frontend:latest
+
