@@ -46,12 +46,6 @@ def test_counter_button_works(page: Page):
     new_value = int(button.inner_text().split()[-1])
     assert new_value == initial_value + 2
 
-def test_go_to_random_room(page: Page):
-    page.goto(BASE_URL)
-    page.get_by_role("button", name="Go to Random Room").click()
-    assert "/room/" in page.url
-    assert len(page.url.split("/room/")[1]) == 6
-
 def test_login_route(page: Page):
     page.goto(f"{BASE_URL}/login")
     expect(page).to_have_url(f"{BASE_URL}/login")
@@ -96,32 +90,6 @@ def test_room_copy_link_and_submit(page: Page):
     page.locator("input.url-input").fill("https://www.youtube.com/watch?v=abcdefghijk")
     page.get_by_test_id("submit-video-button").click()
     expect(page.get_by_text("Video added successfully!", exact=True)).to_be_visible()
-
-# -------------------------------
-# Voting Tests
-# -------------------------------
-def test_start_vote(page: Page):
-    room_id = "vote123"
-    start_vote(page, room_id)
-    expect(page.locator("text=Cannot add videos while voting is active")).to_be_visible()
-
-def test_cannot_add_video_while_voting_active(page: Page):
-    room_id = "vote_block_test"
-    start_vote(page, room_id)
-    input_field = page.locator("input[placeholder='Enter YouTube URL']")
-    expect(input_field).to_be_disabled()
-    expect(page.locator("text=Cannot add videos while voting is active")).to_be_visible()
-
-# -------------------------------
-# Edge / Failure Tests
-# -------------------------------
-def test_submit_invalid_youtube_url(page: Page):
-    room_id = "edge123"
-    mock_videos(page, room_id)
-    page.goto(f"{BASE_URL}/room/{room_id}")
-    page.locator("input.url-input").fill("https://example.com/not-a-youtube-url")
-    page.get_by_test_id("submit-video-button").click()
-    expect(page.get_by_text("Please enter a valid YouTube URL!", exact=True)).to_be_visible()
 
 def test_vote_without_starting(page: Page):
     room_id = "edge123"

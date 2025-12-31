@@ -1,34 +1,39 @@
-import { Router, Request, Response } from "express";
-
-interface VideoEntry {
-  id: string;
-  url: string;
-}
-
-const rooms: Record<string, VideoEntry[]> = {};
+import { Request, Response, Router } from "express";
+import { VideoEntry, rooms } from "../logic/states";
 
 const router = Router();
 
 // GET videos for a room
 router.get("/:roomId", (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-  res.json(rooms[roomId] || []);
+
+  if(!rooms[roomId]){
+    return res.status(404).json({ error: "No room found" });
+  }
+
+  res.json(rooms[roomId].videos);
 });
 
-// POST a new video to a room
+
 router.post("/:roomId", (req: Request, res: Response) => {
   const roomId = req.params.roomId;
   const { url } = req.body as { url: string };
 
-  if (!url) return res.status(400).json({ error: "Missing URL" });
+  if (!url){
+    return res.status(400).json({ error: "Missing URL" });
+  } 
+
+  if(!rooms[roomId]){
+    return res.status(404).json({ error: "No room found" });
+  }
 
   const newVideo: VideoEntry = {
     id: Math.random().toString(36).substring(2, 8),
     url,
+    votes: 0
   };
 
-  if (!rooms[roomId]) rooms[roomId] = [];
-  rooms[roomId].push(newVideo);
+  rooms[roomId].videos.push(newVideo);
 
   res.json({ success: true, video: newVideo });
 });
