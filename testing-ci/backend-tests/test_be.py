@@ -4,7 +4,7 @@ import time
 import uuid
 import pytest
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:5000"
 
 # ----------------- Helper functions -----------------
 

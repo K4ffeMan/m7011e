@@ -29,9 +29,23 @@ jobs:
 
   backend-tests:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: mydatabase
+        ports:
+          - 5432:5432
     needs: lint
     env:
-      BASE_URL: http://localhost:8000
+      BASE_URL: http://localhost:5000
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: pass
+      DB_NAME: mydatabase
 
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +100,7 @@ jobs:
     env:
       PLAYWRIGHT_HEADLESS: 1
       PLAYWRIGHT_BROWSERS_PATH: 0
-      BACKEND_URL: http://localhost:8000
+      BACKEND_URL: http://localhost:5000
 
     steps:
       - uses: actions/checkout@v4
