@@ -154,19 +154,12 @@ function App() {
 }
 
 export default App;
-function setUrls(arg0: (prev: any) => any[]) {
-  throw new Error("Function not implemented.");
-}
-
-function setYoutubeUrl(arg0: string) {
-  throw new Error("Function not implemented.");
-}
 
 function setAlertMessage(arg0: string) {
-  throw new Error("Function not implemented.");
+  throw new Error(arg0);
 }
 
 function setAlertSeverity(arg0: string) {
-  throw new Error("Function not implemented.");
+  throw new Error(arg0);
 }
 
