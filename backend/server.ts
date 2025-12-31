@@ -11,8 +11,13 @@ import votesRouter from "./routes/votes";
 // Load environment variables from .env (local dev only)
 dotenv.config();
 
+
 const app = express();
 const PORT = 5000;
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173" }));
