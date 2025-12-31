@@ -1,7 +1,6 @@
 import httpx
 import subprocess
 import time
-import uuid
 import pytest
 
 BASE_URL = "http://localhost:5000"
