@@ -20,44 +20,41 @@ export async function testConnection() {
 }
 
 export async function createTablesWatch() {
-  const schemaQuery = 
-    `CREATE SCHEMA IF NOT EXISTS watch;`
-  await pool.query(schemaQuery);
+  await pool.query(`
+    CREATE SCHEMA IF NOT EXISTS watch;
 
-  const userQuery = 
-    `CREATE TABLE IF NOT EXISTS watch.users (
+
+    CREATE TABLE IF NOT EXISTS watch.users (
     id TEXT PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
-  await pool.query(userQuery);
+    );
 
-  const roomQuery = 
-    `CREATE TABLE IF NOT EXISTS watch.rooms (
+    CREATE TABLE IF NOT EXISTS watch.rooms (
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,
+    voting_active BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (owner_id)
       REFERENCES watch.users(id)
       ON DELETE CASCADE
-    );`
-  await pool.query(roomQuery);
+    );
 
-  const videoQuery = 
-    `CREATE TABLE IF NOT EXISTS watch.videos (
+    CREATE TABLE IF NOT EXISTS watch.videos (
     id SERIAL PRIMARY KEY,
     room_id TEXT NOT NULL,
     url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    CONSTRAINT unique_video_per_room
+    UNIQUE (room_id, url),
+
     FOREIGN KEY (room_id)
       REFERENCES watch.rooms(id)
       ON DELETE CASCADE
-    );`
-  await pool.query(videoQuery);
+    );
 
-  const voteQuery = 
-    `CREATE TABLE IF NOT EXISTS watch.votes (
+    CREATE TABLE IF NOT EXISTS watch.votes (
     id SERIAL PRIMARY KEY,
     room_id TEXT NOT NULL,
     video_id INTEGER NOT NULL,
@@ -77,7 +74,7 @@ export async function createTablesWatch() {
       ON DELETE CASCADE,
 
     UNIQUE (room_id, user_id)
-    );`
-  await pool.query(voteQuery);
+    );
+  `);
 };
 

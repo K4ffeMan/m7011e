@@ -1,20 +1,29 @@
 import { Request, Response, Router } from "express";
-import { rooms } from "../logic/states";
+import { pool } from "../db/database";
 
 const router = Router();
 
 
-router.post("/start/:roomId", (req: Request, res: Response) => {
+router.post("/start/:roomId", async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-  if(!rooms[roomId]){
-    return res.status(404).json({ error: "No room found" });
-  }
-  
-  rooms[roomId].votingActive = true;
+
+  const room = await pool.query(
+    `SELECT 1 FROM watch.rooms
+    WHERE id = $1`,
+    [roomId]
+  );
+
+  const votingstatus = await pool.query(
+    `UPDATE watch.rooms
+    SET voting_active = true
+    WHERE id = $1
+    RETURNING voting_active`,
+    [roomId]
+  );
 
   return res.status(200).json({
     success: true,
-    votingActive: rooms[roomId].votingActive,
+    votingActive: votingstatus.rows[0].voting_active,
   });
 });
 

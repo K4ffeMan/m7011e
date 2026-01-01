@@ -1,37 +1,67 @@
 import { Request, Response, Router } from "express";
-import { rooms } from "../logic/states";
+import { pool } from "../db/database";
 
 const router = Router();
 
 
-
-// POST a new video to a room
-router.post("/:roomId/:videosId", (req: Request, res: Response) => {
+router.post("/:roomId/:videoId", async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-  const videoId = req.params.videosId;
+  const videoId = req.params.videoId;
+  const userId = Math.random().toString(36).substring(2, 8);
+  
+  
 
-  if(!rooms[roomId]){
+  const room = await pool.query(
+    `SELECT voting_active FROM watch.rooms
+    WHERE id = $1`,
+    [roomId]
+  );
+
+  if(room.rowCount == 0){
     return res.status(404).json({ error: "No room found" });
   }
 
-  if(!rooms[roomId].votingActive){
+  const {voting_active} = room.rows[0]
+
+  if(voting_active == false){
     return res.status(403).json({error: "Voting need to be active"});
   }
 
-  var votes = null;
+  try{
 
-  for (var i = 0; i < rooms[roomId].videos.length; i++){
-    if (videoId == rooms[roomId].videos[i].id){
-      rooms[roomId].videos[i].votes += 1;
-      votes = rooms[roomId].videos[i].votes;
-    }
-  }
-  
-  return res.status(200).json({
+    //This is only for testing right now. Will be removed in future
+    await pool.query(
+      `INSERT INTO watch.users (id)
+      VALUES ($1)
+      ON CONFLICT DO NOTHING`,
+      [userId]
+    );
+
+    await pool.query(
+        `INSERT INTO watch.votes (room_id, video_id, user_id)
+        VALUES ($1, $2, $3)`,
+        [roomId, videoId, userId]
+    );
+
+    const numbVotes = await pool.query(
+        `SELECT COUNT(*) FROM watch.votes
+        WHERE room_id = $1 AND video_id = $2`,
+        [roomId, videoId]
+    );
+
+    const totVotes = numbVotes.rows[0].count
+
+    return res.status(200).json({
     success: true,
     videoId,
-    votes
+    votes: totVotes
   });
+
+  }catch(err: any){
+    if(err.code === "23505"){
+      return res.json({success: false, error: "User already voted"});
+    }
+  }
 });
 
 export default router;
