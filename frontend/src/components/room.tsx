@@ -10,7 +10,7 @@ import "./room.css";
 
 
 interface YouTubeEntry {
-  id: string;
+  id: number;
   url: string;
   votes: number;
 }
@@ -49,9 +49,11 @@ function Room() {
 
   const startVote = async () => {
     try {
-      const res = await axios.post(`/api/vote/start/${roomId}`);
-      setVotingActive(res.data.votingActive);
+      setVotingActive(true);   
       setVoteEnded(false);
+      await axios.post(`/api/vote/start/${roomId}`);
+      const res = await axios.get(`/api/videos/${roomId}`);
+      setUrls(res.data);
       setAlertMessage("Voting started!");
       setAlertSeverity("info");
     } catch {
@@ -59,8 +61,14 @@ function Room() {
       setAlertSeverity("error");
     }
   };
+  
 
-  const castVote = async (videoId: string) => {
+
+  const castVote = async (videoId: number) => {
+    if (!roomId || !videoId) {
+      console.error("Vote blocked — invalid state", { roomId, videoId });
+      return;
+    }
     try {
       const res = await axios.post(`/api/vote/${roomId}/${videoId}`);
       
@@ -112,6 +120,14 @@ function Room() {
   };
 
 
+const fetchRoomState = async () => {
+    const res = await axios.get(`/api/rooms/${roomId}`);
+    setVotingActive(res.data.votingActive);
+  };
+
+  useEffect(() => {
+    fetchRoomState();
+  }, [roomId]);
 
 
   const handleCopyLink = () => {
@@ -169,9 +185,10 @@ function Room() {
   
   const wheelData = urls.flatMap((video) =>
     Array(video.votes || 1).fill({
-      option: video.id,
+      option: video.url,
     })
   );
+
   return (
     <div className="room-container">
       <Button
@@ -281,15 +298,16 @@ function Room() {
                 ) : (
                   <p>Invalid URL</p>
                 )}
-
+                
                 <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => castVote(entry.id)}
+                  onClick={() => {
+                    if (!entry.id) return;
+                    castVote(entry.id);
+                  }}
+                  
                   disabled={!votingActive}
-                  data-testid={`vote-button-${entry.id}`}
                 >
-                  👍 {entry.votes}
+                  👍 {entry.votes ?? 0}
                 </Button>
               </div>
 
