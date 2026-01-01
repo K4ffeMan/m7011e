@@ -21,26 +21,20 @@ export async function testConnection() {
 
 export async function createTablesWatch() {
   await pool.query(`
-    CREATE SCHEMA IF NOT EXISTS watch;
+    CREATE SCHEMA IF NOT EXISTS watch;`
+  );
 
-
-    CREATE TABLE IF NOT EXISTS watch.users (
-    id TEXT PRIMARY KEY,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS watch.rooms (
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS watch.rooms (
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,
     voting_active BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );`
+  );
 
-    FOREIGN KEY (owner_id)
-      REFERENCES watch.users(id)
-      ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS watch.videos (
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS watch.videos (
     id SERIAL PRIMARY KEY,
     room_id TEXT NOT NULL,
     url TEXT NOT NULL,
@@ -52,9 +46,11 @@ export async function createTablesWatch() {
     FOREIGN KEY (room_id)
       REFERENCES watch.rooms(id)
       ON DELETE CASCADE
-    );
+    );`
+  );
 
-    CREATE TABLE IF NOT EXISTS watch.votes (
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS watch.votes (
     id SERIAL PRIMARY KEY,
     room_id TEXT NOT NULL,
     video_id INTEGER NOT NULL,
@@ -67,10 +63,6 @@ export async function createTablesWatch() {
 
     FOREIGN KEY (video_id)
       REFERENCES watch.videos(id)
-      ON DELETE CASCADE,
-
-    FOREIGN KEY (user_id)
-      REFERENCES watch.users(id)
       ON DELETE CASCADE,
 
     UNIQUE (room_id, user_id)

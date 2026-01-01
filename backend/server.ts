@@ -21,9 +21,6 @@ app.get("/health", (_req, res) => {
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(bodyParser.json());
 
-// Test PostgreSQL connection on startup
-
-
 // Routes
 app.use("/api/videos", videosRouter);
 app.use("/api/vote", startVotesRouter);

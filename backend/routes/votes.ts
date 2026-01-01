@@ -1,14 +1,14 @@
 import { Request, Response, Router } from "express";
+import { keycloakJwt } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
 
 
-router.post("/:roomId/:videoId", async (req: Request, res: Response) => {
+router.post("/:roomId/:videoId", keycloakJwt, async (req: Request, res: Response) => {
+  const userId = (req as any).auth?.sub;
   const roomId = req.params.roomId;
   const videoId = req.params.videoId;
-  const userId = Math.random().toString(36).substring(2, 8);
-  
   
 
   const room = await pool.query(
@@ -28,14 +28,6 @@ router.post("/:roomId/:videoId", async (req: Request, res: Response) => {
   }
 
   try{
-
-    //This is only for testing right now. Will be removed in future
-    await pool.query(
-      `INSERT INTO watch.users (id)
-      VALUES ($1)
-      ON CONFLICT DO NOTHING`,
-      [userId]
-    );
 
     await pool.query(
         `INSERT INTO watch.votes (room_id, video_id, user_id)
