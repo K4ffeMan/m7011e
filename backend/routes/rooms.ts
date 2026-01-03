@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { authtest } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
@@ -24,15 +25,9 @@ router.get("/:roomId", async (req: Request, res: Response) => {
 });
 
 
-router.post("/", async (req: Request, res: Response) => {
-
-  const userId = Math.random().toString(36).substring(2, 8);
+router.post("/", authtest, async (req: Request, res: Response) => {
+  const userId = req.auth?.sub;
   const roomId = Math.random().toString(36).substring(2, 8);
-  await pool.query(
-    `INSERT INTO watch.users
-    VALUES ($1)`,
-    [userId]
-  );
   
   await pool.query(
     `INSERT INTO watch.rooms (id, owner_id, voting_active)

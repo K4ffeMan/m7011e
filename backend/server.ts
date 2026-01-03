@@ -8,8 +8,6 @@ import startVotesRouter from "./routes/startVote";
 import videosRouter from "./routes/videos";
 import votesRouter from "./routes/votes";
 
-
-
 const app = express();
 const PORT = 5000;
 
@@ -20,9 +18,6 @@ app.get("/health", (_req, res) => {
 // Middleware
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(bodyParser.json());
-
-// Test PostgreSQL connection on startup
-
 
 // Routes
 app.use("/api/videos", videosRouter);

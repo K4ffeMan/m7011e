@@ -2,10 +2,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Wheel } from "react-custom-roulette";
 import { useNavigate, useParams } from "react-router-dom";
+import keyaxios from "../auth/keycloakaxios";
 import "./room.css";
 
 
@@ -35,7 +35,7 @@ function Room() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await axios.get<YouTubeEntry[]>(`/api/videos/${roomId}`);
+        const res = await keyaxios.get<YouTubeEntry[]>(`/api/videos/${roomId}`);
         setUrls(Array.isArray(res.data) ? res.data : []);
       } catch {
         setAlertMessage("Failed to load videos");
@@ -51,8 +51,8 @@ function Room() {
     try {
       setVotingActive(true);   
       setVoteEnded(false);
-      await axios.post(`/api/vote/start/${roomId}`);
-      const res = await axios.get(`/api/videos/${roomId}`);
+      await keyaxios.post(`/api/vote/start/${roomId}`);
+      const res = await keyaxios.get(`/api/videos/${roomId}`);
       setUrls(res.data);
       setAlertMessage("Voting started!");
       setAlertSeverity("info");
@@ -70,7 +70,7 @@ function Room() {
       return;
     }
     try {
-      const res = await axios.post(`/api/vote/${roomId}/${videoId}`);
+      const res = await keyaxios.post(`/api/vote/${roomId}/${videoId}`);
       
       setUrls(prev =>
       prev.map(video =>
@@ -87,7 +87,7 @@ function Room() {
 
   const endVote = async () => {
     try {
-      const res = await axios.post(`/api/vote/end/${roomId}`);
+      const res = await keyaxios.post(`/api/vote/end/${roomId}`);
       setVotingActive(res.data.votingActive);
       setUrls(res.data.videos);
       setVoteEnded(true);
@@ -101,27 +101,40 @@ function Room() {
 
 
   const spinWheel = () => {
-    const weightedList: number[] = [];
+  const votedVideos = urls.filter(v => v.votes > 0);
 
-    urls.forEach((video, index) => {
-      const voteCount = video.votes || 1; // fallback
-      for (let i = 0; i < voteCount; i++) {
+  
+  if (votedVideos.length === 1) {
+    setWinner(votedVideos[0]);
+    setVoteEnded(true);
+    return;
+  }
+
+  
+  const weightedList: number[] = [];
+
+  urls.forEach((video, index) => {
+    if (video.votes > 0) {
+      for (let i = 0; i < video.votes; i++) {
         weightedList.push(index);
       }
-    });
+    }
+  });
 
-    if (weightedList.length === 0) return;
+  if (weightedList.length === 0) return;
 
-    const randomIndex =
-      weightedList[Math.floor(Math.random() * weightedList.length)];
+  const randomIndex =
+    weightedList[Math.floor(Math.random() * weightedList.length)];
 
-    setWinningIndex(randomIndex);
-    setSpinning(true);
-  };
+  setWinningIndex(randomIndex);
+  setSpinning(true);
+};
+
+
 
 
 const fetchRoomState = async () => {
-    const res = await axios.get(`/api/rooms/${roomId}`);
+    const res = await keyaxios.get(`/api/rooms/${roomId}`);
     setVotingActive(res.data.votingActive);
   };
 
@@ -160,7 +173,7 @@ const fetchRoomState = async () => {
     }
 
     try {
-      const res = await axios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
+      const res = await keyaxios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
       if (res.data.success) {
         
         setUrls((prev) => [
@@ -183,11 +196,12 @@ const fetchRoomState = async () => {
 
   const goHome = () => navigate("/");
   
-  const wheelData = urls.flatMap((video) =>
-    Array(video.votes || 1).fill({
-      option: video.url,
-    })
+  const wheelData = urls
+  .filter(video => video.votes > 0)
+  .flatMap(video =>
+    Array(video.votes).fill({ option: video.url })
   );
+
 
   return (
     <div className="room-container">

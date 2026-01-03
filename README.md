@@ -21,7 +21,7 @@ docker compose up postgres
 ```
 in backend
 ```
-npm run dev
+npm run build
 ```
 
 

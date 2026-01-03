@@ -1,21 +1,15 @@
-import axios from "axios";
-import Keycloak from 'keycloak-js';
+import CloseIcon from "@mui/icons-material/Close";
+import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
 import mutter from "./assets/TKL.png";
 import ytLogo from "./assets/youtube-logo.png";
-import { keycloakConfig } from "./auth/keycloak-config";
+import { getKeycloak } from "./auth/keycloak";
+import keyaxios from "./auth/keycloakaxios";
 import Header from "./components/header";
 import Room from "./components/room";
-
-let keycloakInstance: Keycloak | null = null;
-const getKeycloak = () => {
-  if (!keycloakInstance) {
-    keycloakInstance = new Keycloak(keycloakConfig);
-  }
-  return keycloakInstance;
-};
 
 
 interface User {
@@ -29,7 +23,10 @@ interface User {
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [count, setCount] = useState<number>(0);
-
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+const [alertSeverity, setAlertSeverity] = useState<
+  "success" | "info" | "warning" | "error"
+>("info");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +41,7 @@ function App() {
       pkceMethod: 'S256',
       checkLoginIframe: false
     }).then(authenticated => {
+      console.log('Access token:', keycloak.token);
       setAuthenticated(authenticated);
       setLoading(false);
 
@@ -69,14 +67,20 @@ function App() {
   const goToRandomRoom = async (): Promise<void> => {
     
     try {
-      const res = await axios.post(`/api/rooms/`);
+      const res = await keyaxios.post(`/api/rooms/`);
       if (res.data.success) {
         navigate(`/room/${res.data.roomId}`);
       }
-    } catch {
+    } catch (err: any){
+      if (err.response?.status === 401) {
+      setAlertMessage("You must log in to create a room.");
+      setAlertSeverity("warning");
+      getKeycloak().login();
+    }else{
       setAlertMessage("Failed to create a room");
       setAlertSeverity("error");
     }
+  }
     
   };
 
@@ -91,6 +95,23 @@ function App() {
 
   return (
     <>
+      {alertMessage && (
+        <Alert
+          severity={alertSeverity}
+          action={
+            <IconButton
+              color="inherit"
+              size="small"
+              onClick={() => setAlertMessage(null)}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          {alertMessage}
+        </Alert>
+      )}
       <Header
         authenticated={authenticated}
         onLogin={handleLogin}
@@ -154,12 +175,3 @@ function App() {
 }
 
 export default App;
-
-function setAlertMessage(arg0: string) {
-  throw new Error(arg0);
-}
-
-function setAlertSeverity(arg0: string) {
-  throw new Error(arg0);
-}
-
