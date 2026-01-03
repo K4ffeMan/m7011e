@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true                   
   },
-  "include": ["./**/*.ts"],               
+  "files": ["auth/jwtauth.d.ts"],
+  "include": ["**/*.ts", "**/*.d.ts"],               
   "exclude": ["node_modules", "dist"]     
 }

@@ -1,3 +1,4 @@
+import os
 import httpx
 import subprocess
 import time
@@ -9,13 +10,17 @@ BASE_URL = "http://localhost:5000"
 
 def start_server():
     """Start backend server in the background."""
+    env = os.environ.copy()
+    env["NODE_ENV"] = "test"
+    env["PORT"] = "5000"
     proc = subprocess.Popen(
-        ["node", "server.ts"],
+        ["node", "dist/server.js"],
         cwd="backend",
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    time.sleep(1)  # wait a moment for the server to be ready
+    time.sleep(3)  # wait a moment for the server to be ready
     return proc
 
 def stop_server(proc):

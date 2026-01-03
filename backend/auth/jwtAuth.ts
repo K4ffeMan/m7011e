@@ -1,3 +1,4 @@
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { expressjwt } from "express-jwt";
 import jwksRsa from "jwks-rsa";
 
@@ -11,3 +12,18 @@ export const keycloakJwt = expressjwt({
   issuer: "https://keycloak-dev.ltu-m7011e-7.se/realms/user",
   algorithms: ["RS256"],
 });
+
+export const mockJwt = (req: Request, res: Response, next: NextFunction) => {
+  req.auth = {
+    sub: "mock-user"
+  };
+  next();
+}
+
+export const authtest: RequestHandler = (req, res, next) =>{
+  if(process.env.NODE_ENV === "test"){
+    return mockJwt(req, res, next);
+  }else{
+    return keycloakJwt(req, res, next);
+  }
+}

@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { keycloakJwt } from "../auth/jwtAuth";
+import { authtest } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
@@ -25,9 +25,8 @@ router.get("/:roomId", async (req: Request, res: Response) => {
 });
 
 
-router.post("/", keycloakJwt, async (req: Request, res: Response) => {
-  console.log("reach")
-  const userId = (req as any).auth?.sub;
+router.post("/", authtest, async (req: Request, res: Response) => {
+  const userId = req.auth?.sub;
   const roomId = Math.random().toString(36).substring(2, 8);
   
   await pool.query(

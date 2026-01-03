@@ -8,8 +8,6 @@ import startVotesRouter from "./routes/startVote";
 import videosRouter from "./routes/videos";
 import votesRouter from "./routes/votes";
 
-
-
 const app = express();
 const PORT = 5000;
 
