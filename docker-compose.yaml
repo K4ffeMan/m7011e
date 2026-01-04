@@ -5,10 +5,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args: 
+        - http://backend:5000
     ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_URL=http://localhost:5000
+      - "5173:3000"
     networks:
       - app-network
   postgres:
@@ -21,15 +21,49 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   backend:
     build: ./backend
+    command: node dist/server.js
     ports:
       - "5000:5000"
     env_file:
       - ./backend/.env
     depends_on:
       - postgres
+      - rabbitmq
+    restart: unless-stopped
+    networks:
+      - app-network
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: adminpass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network
+
+  rabbit-worker:
+    build: ./backend
+    command: node dist/rabbitmq.js
+    env_file:
+      - ./backend/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
 
 volumes:
   pgdata:

@@ -16,7 +16,7 @@ app.get("/health", (_req, res) => {
 });
 
 // Middleware
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000"] }));
 app.use(bodyParser.json());
 
 // Routes
@@ -27,19 +27,20 @@ app.use("/api/rooms", roomsrouter);
 app.use("/api/vote", votesRouter);
 
 
-async function startserver() {
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+async function initdatabase() {
   try{
     await testConnection();
     await createTablesWatch();
 
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
+    console.log("database working")
   }catch(err){
-    console.log("Something went wrong")
-    process.exit(1);
+    console.log("Database is not working")
   }
 }
 
-startserver();
+initdatabase();
 

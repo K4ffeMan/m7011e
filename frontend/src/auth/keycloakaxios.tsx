@@ -2,7 +2,7 @@ import axios from "axios";
 import { getKeycloak } from "./keycloak";
 
 const keyaxios = axios.create({
-  baseURL: import.meta.env.VITE_API_UR,
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 keyaxios.interceptors.request.use(async config => {
