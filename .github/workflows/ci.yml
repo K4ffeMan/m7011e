@@ -125,7 +125,6 @@ jobs:
   docker-frontend:
     name: Build & push frontend Docker image
     runs-on: ubuntu-latest
-    needs: backend-tests  
 
     steps:
       - name: Checkout code
