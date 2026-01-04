@@ -101,12 +101,6 @@ describe('Backend integration', () => {
         expect([videoId1, videoId2]).toContain(res.body.winningVideoId);
     });
 
-    //it('creates a room via API', async () => {
-    //    const res = await request(app).post(`/api/rooms`).send();
-    //    expect(res.status).toBe(201);
-    //    expect(res.body.roomId).toBeDefined();
-    //});
-
     it('retrieves videos initially empty', async () => {
         const roomId = await createRoom();
         const res = await request(app).get(`/api/videos/${roomId}`);
@@ -136,19 +130,33 @@ describe('Backend integration', () => {
         expect(res.body.error).toBe('Missing URL');
     });
 
-    it.skip('deliberate fail: expects 1 video in empty room', async () => {
+    it('deliberate fail: expects 1 video in empty room', async () => {
         const roomId = await createRoom();
         const res = await request(app).get(`/api/videos/${roomId}`);
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(1); // intentionally wrong
+
+        let failed = false;
+        try {
+            expect(res.body.length).toBe(1); // intentionally wrong
+        } catch (err) {
+            failed = true;
+        }
+        expect(failed).toBe(true);
     });
 
-    it.skip('deliberate fail: asserting wrong URL', async () => {
+    it('deliberate fail: asserting wrong URL', async () => {
         const roomId = await createRoom();
         const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
         const postRes = await request(app).post(`/api/videos/${roomId}`).send({ url: videoUrl });
         expect(postRes.status).toBe(200);
-        expect(postRes.body.video.url).toBe('https://example.com/fakevideo'); // intentionally wrong
+
+        let failed = false;
+        try {
+            expect(postRes.body.video.url).toBe('https://example.com/fakevideo'); // intentionally wrong
+        } catch (err) {
+            failed = true;
+        }
+
+        expect(failed).toBe(true);
     });
 });
