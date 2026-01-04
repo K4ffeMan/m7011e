@@ -12,7 +12,7 @@ router.post("/:roomId/:videoId", keycloakJwt, async (req: Request, res: Response
   
 
   const room = await pool.query(
-    `SELECT voting_active FROM watch.rooms
+    `SELECT game_state FROM watch.rooms
     WHERE id = $1`,
     [roomId]
   );
@@ -21,9 +21,9 @@ router.post("/:roomId/:videoId", keycloakJwt, async (req: Request, res: Response
     return res.status(404).json({ error: "No room found" });
   }
 
-  const {voting_active} = room.rows[0]
+  const {game_state} = room.rows[0]
 
-  if(voting_active == false){
+  if(game_state != "voting"){
     return res.status(403).json({error: "Voting need to be active"});
   }
 

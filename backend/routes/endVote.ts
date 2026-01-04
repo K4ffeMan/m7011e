@@ -7,14 +7,6 @@ const router = Router();
 router.post("/end/:roomId", async (req: Request, res: Response) => {
    const roomId = req.params.roomId;
   
-    const room = await pool.query(
-      `UPDATE watch.rooms
-      SET voting_active = false
-      WHERE id = $1
-      RETURNING voting_active`,
-      [roomId]
-    );
-
     const videos = await pool.query(
         `SELECT id, url FROM watch.videos
         WHERE room_id = $1`,
@@ -28,10 +20,10 @@ router.post("/end/:roomId", async (req: Request, res: Response) => {
         [roomId]
     );
 
-    const voteMap = new Map<number, number>();
+    const vote = new Map<number, number>();
 
     for (const row of numbVotes.rows) {
-        voteMap.set(row.video_id, row.votes);
+        vote.set(row.video_id, row.votes);
     }
     const videosfull = [];
 
@@ -39,12 +31,42 @@ router.post("/end/:roomId", async (req: Request, res: Response) => {
         videosfull.push({
             id: video.id,
             url: video.url,
-            votes: voteMap.get(video.id),
+            votes: vote.get(video.id),
         });
     }
+
+    const weightVoting = [];
+
+    for (const video of videosfull){
+      if (video.votes == undefined){
+        video.votes = 0;
+      }
+      for(let i = 0; i < video.votes; i++){
+        weightVoting.push(video.id);
+      }
+    }
+
+    if (weightVoting.length === 0){
+      return res.status(400).json({error: "no votes"})
+    }
+
+    console.log(weightVoting)
+
+    const winner = weightVoting[Math.floor(Math.random()* weightVoting.length)];
+
+    const room = await pool.query(
+      `UPDATE watch.rooms
+      SET game_state = $1,
+      winner_video = $2
+      WHERE id = $3
+      RETURNING game_state, winner_video`,
+      ["finish", winner, roomId]
+    );
+
   return res.status(200).json({
     success: true,
-    votingActive: room.rows[0].voting_active,
+    gameState: room.rows[0].game_state,
+    winningVideoId: room.rows[0].winner_video,
     videos: videosfull
   });
 });
