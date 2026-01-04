@@ -3,11 +3,9 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
-import { Wheel } from "react-custom-roulette";
 import { useNavigate, useParams } from "react-router-dom";
 import keyaxios from "../auth/keycloakaxios";
 import "./room.css";
-
 
 interface YouTubeEntry {
   id: number;
@@ -15,360 +13,226 @@ interface YouTubeEntry {
   votes: number;
 }
 
+type GameState = "lobby" | "voting" | "finish";
+
 function Room() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
-  const [votingActive, setVotingActive] = useState(false);
-  const [voteEnded, setVoteEnded] = useState(false);
+
   const [urls, setUrls] = useState<YouTubeEntry[]>([]);
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [winner, setWinner] = useState<YouTubeEntry | null>(null);
-  const [spinning, setSpinning] = useState(false);
-  const [winningIndex, setWinningIndex] = useState(0);
+
+  const [roomState, setRoomState] = useState<{
+    gameState: GameState;
+    winningVideoId?: number;
+  }>({ gameState: "lobby" });
+
+  const [showWinner, setShowWinner] = useState(false);
+  const [revealingWinner, setRevealingWinner] = useState(false);
+
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertSeverity, setAlertSeverity] = useState<
-    "success" | "info" | "warning" | "error"
-  >("success");
+  const [alertSeverity, setAlertSeverity] =
+    useState<"success" | "info" | "warning" | "error">("success");
 
+  const isLobby = roomState.gameState === "lobby";
+  const isVoting = roomState.gameState === "voting";
+  const isFinished = roomState.gameState === "finish";
 
-  // Fetch videos
+  /* Fetch videos */
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         const res = await keyaxios.get<YouTubeEntry[]>(`/api/videos/${roomId}`);
-        setUrls(Array.isArray(res.data) ? res.data : []);
+        setUrls(res.data ?? []);
       } catch {
         setAlertMessage("Failed to load videos");
         setAlertSeverity("error");
-        setUrls([]);
       }
     };
-
     fetchVideos();
   }, [roomId]);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await keyaxios.get<YouTubeEntry[]>(
+          `/api/videos/${roomId}`
+        );
+        setUrls(res.data ?? []);
+      } catch {
+        // silent fail
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [roomId]);
+
+  /* Poll room state */
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await keyaxios.get(`/api/rooms/${roomId}`);
+
+      const raw = res.data.winning_video;
+      const winningVideoId =
+        raw === null || raw === undefined ? undefined : Number(raw);
+
+      setRoomState({
+        gameState: res.data.gameState,
+        winningVideoId,
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [roomId]);
+
+  useEffect(() => {
+  if (roomState.gameState === "finish") {
+    setShowWinner(false);
+    setRevealingWinner(true);
+
+    const t = setTimeout(() => {
+      setRevealingWinner(false);
+      setShowWinner(true);
+    }, 2500);
+
+    return () => clearTimeout(t);
+  }
+}, [roomState.gameState]);
+
+  /* Actions */
   const startVote = async () => {
     try {
-      setVotingActive(true);   
-      setVoteEnded(false);
       await keyaxios.post(`/api/vote/start/${roomId}`);
-      const res = await keyaxios.get(`/api/videos/${roomId}`);
-      setUrls(res.data);
-      setAlertMessage("Voting started!");
-      setAlertSeverity("info");
     } catch {
       setAlertMessage("Failed to start vote");
-      setAlertSeverity("error");
-    }
-  };
-  
-
-
-  const castVote = async (videoId: number) => {
-    if (!roomId || !videoId) {
-      console.error("Vote blocked — invalid state", { roomId, videoId });
-      return;
-    }
-    try {
-      const res = await keyaxios.post(`/api/vote/${roomId}/${videoId}`);
-      
-      setUrls(prev =>
-      prev.map(video =>
-        video.id === videoId
-          ? { ...video, votes: res.data.votes }
-          : video
-      )
-    );
-    } catch {
-      setAlertMessage("Failed to cast vote");
       setAlertSeverity("error");
     }
   };
 
   const endVote = async () => {
     try {
-      const res = await keyaxios.post(`/api/vote/end/${roomId}`);
-      setVotingActive(res.data.votingActive);
-      setUrls(res.data.videos);
-      setVoteEnded(true);
-      setAlertMessage("Voting ended! Winning video kept.");
-      setAlertSeverity("success");
+      await keyaxios.post(`/api/vote/end/${roomId}`);
     } catch {
       setAlertMessage("Failed to end vote");
       setAlertSeverity("error");
     }
   };
 
-
-  const spinWheel = () => {
-  const votedVideos = urls.filter(v => v.votes > 0);
-
-  
-  if (votedVideos.length === 1) {
-    setWinner(votedVideos[0]);
-    setVoteEnded(true);
-    return;
-  }
-
-  
-  const weightedList: number[] = [];
-
-  urls.forEach((video, index) => {
-    if (video.votes > 0) {
-      for (let i = 0; i < video.votes; i++) {
-        weightedList.push(index);
-      }
+  const castVote = async (videoId: number) => {
+    try {
+      await keyaxios.post(`/api/vote/${roomId}/${videoId}`);
+    } catch {
+      setAlertMessage("Failed to vote");
+      setAlertSeverity("error");
     }
-  });
-
-  if (weightedList.length === 0) return;
-
-  const randomIndex =
-    weightedList[Math.floor(Math.random() * weightedList.length)];
-
-  setWinningIndex(randomIndex);
-  setSpinning(true);
-};
-
-
-
-
-const fetchRoomState = async () => {
-    const res = await keyaxios.get(`/api/rooms/${roomId}`);
-    setVotingActive(res.data.votingActive);
   };
 
-  useEffect(() => {
-    fetchRoomState();
-  }, [roomId]);
-
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setAlertMessage("Room link copied!");
-    setAlertSeverity("success");
-  };
-
-  const extractYouTubeId = (url: string): string | null => {
-    const regex =
-      /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
-  const toEmbedUrl = (url: string) => {
-    const id = extractYouTubeId(url);
-    return id ? `https://www.youtube.com/embed/${id}` : null;
-  };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!youtubeUrl.trim()) return;
-
-    const videoId = extractYouTubeId(youtubeUrl);
-    if (!videoId) {
-      setAlertMessage("Please enter a valid YouTube URL!");
-      setAlertSeverity("error");
-      return;
-    }
-
     try {
-      const res = await keyaxios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
-      if (res.data.success) {
-        
-        setUrls((prev) => [
-          ...prev,
-          {
-            id: res.data.video.id,
-            url: youtubeUrl,
-            votes: 0,
-          },
-        ]);
+      await keyaxios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
         setYoutubeUrl("");
-        setAlertMessage("Video added successfully!");
-        setAlertSeverity("success");
-      }
+      }catch {
+      setAlertMessage("Failed to add video");
+      setAlertSeverity("error");
+    }
+  };
+
+  const inviteLink = `${window.location.origin}/room/${roomId}`;
+
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setAlertMessage("Invite link copied to clipboard!");
+      setAlertSeverity("success");
     } catch {
-      setAlertMessage("Failed to add video!");
+      setAlertMessage("Failed to copy invite link");
       setAlertSeverity("error");
     }
   };
 
   const goHome = () => navigate("/");
-  
-  const wheelData = urls
-  .filter(video => video.votes > 0)
-  .flatMap(video =>
-    Array(video.votes).fill({ option: video.url })
-  );
 
+  const toEmbedUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    const id = u.searchParams.get("v");
+    return id ? `https://www.youtube.com/embed/${id}` : "";
+  } catch {
+    return "";
+  }
+};
 
   return (
     <div className="room-container">
-      <Button
-        variant="outlined"
-        className="home-button"
-        onClick={goHome}
-        data-testid="home-button"
-      >
-        ← Home
-      </Button>
+      <Button onClick={goHome}>← Home</Button>
 
       {alertMessage && (
         <Alert
           severity={alertSeverity}
           action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => setAlertMessage(null)}
-            >
+            <IconButton onClick={() => setAlertMessage(null)}>
               <CloseIcon fontSize="inherit" />
             </IconButton>
           }
-          style={{ marginBottom: "1rem" }}
         >
           {alertMessage}
         </Alert>
       )}
 
-      <div className="room-header">
-        <h1>Room: {roomId}</h1>
-        <Button
-          variant="contained"
-          onClick={handleCopyLink}
-          data-testid="copy-link-button"
-        >
-          Copy Room Link
-        </Button>
-      </div>
+      <h1>Room: {roomId}</h1>
 
-      <form className="url-form" onSubmit={handleSubmit}>
-        <input
-          type="url"
-          value={youtubeUrl}
-          onChange={(e) => setYoutubeUrl(e.target.value)}
-          placeholder="Enter YouTube URL"
-          className="url-input"
-          required
-          disabled={votingActive}
-          data-testid="video-url-input"
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={votingActive}
-          data-testid="submit-video-button"
-        >
-          Submit
-        </Button>
-      </form>
+      <Button
+        variant="outlined"
+        onClick={copyInviteLink}
+        style={{ marginBottom: "1rem" }}
+      >
+        Invite others
+      </Button>
 
-      {votingActive && (
-        <p style={{ color: "#ef4444", fontStyle: "italic" }}>
-          Cannot add videos while voting is active.
-        </p>
+      {isLobby && (
+        <form onSubmit={handleSubmit}>
+          <input
+            type="url"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            placeholder="Enter YouTube URL"
+            required
+          />
+          <Button type="submit">Submit</Button>
+        </form>
       )}
 
-      <div className="voting-buttons" style={{ marginBottom: "1rem" }}>
-        {!votingActive && urls.length > 0 && !voteEnded &&(
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={startVote}
-            data-testid="start-vote-button"
-          >
-            Start Vote
-          </Button>
-        )}
-
-        {votingActive && (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={endVote}
-            data-testid="end-vote-button"
-            style={{ marginLeft: "1rem" }}
-          >
-            End Vote
-          </Button>
-        )}
-      </div>
+      {isLobby && urls.length > 0 && <Button onClick={startVote}>Start Vote</Button>}
+      {isVoting && <Button onClick={endVote}>End Vote</Button>}
 
       <div className="video-grid">
-        {Array.isArray(urls) && urls.length > 0 ? (
-          urls.map((entry) => {
-            const embedUrl = toEmbedUrl(entry.url);
-            return (
-              <div key={entry.id} className="video-card">
-                {embedUrl ? (
-                  <iframe
-                    src={embedUrl}
-                    title="YouTube video player"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <p>Invalid URL</p>
-                )}
-                
-                <Button
-                  onClick={() => {
-                    if (!entry.id) return;
-                    castVote(entry.id);
-                  }}
-                  
-                  disabled={!votingActive}
-                >
-                  👍 {entry.votes ?? 0}
-                </Button>
-              </div>
-
-            );
-          })
-        ) : (
-          <p style={{ textAlign: "center", color: "#6b7280" }}>
-            No videos yet — submit one above!
-          </p>
-        )}
+        {urls.map((entry) => (
+          <div key={entry.id} className="video-card">
+            <iframe src={toEmbedUrl(entry.url)} allowFullScreen title="yt" />
+            <Button disabled={!isVoting} onClick={() => castVote(entry.id)}>
+              👍 {entry.votes}
+            </Button>
+          </div>
+        ))}
       </div>
-      {!votingActive && urls.length > 0 && !winner && voteEnded &&(
-        <Button
-          variant="contained"
-          color="success"
-          onClick={spinWheel}
-          style={{ marginTop: "1rem" }}
-          disabled={spinning}
-        >
-          {spinning ? "Spinning..." : "Spin the Wheel 🎡"}
-        </Button>
+
+      {revealingWinner && (
+        <h2 style={{ marginTop: "2rem" }}>
+          Spinning the wheel...
+        </h2>
       )}
 
-      {voteEnded && (
-        <Wheel
-          mustStartSpinning={spinning}
-          prizeNumber={winningIndex}
-          data={wheelData}
-          backgroundColors={["#3e3e3e", "#df3428"]}
-          textColors={["#ffffff"]}
-          onStopSpinning={() => {
-            setSpinning(false);
-            setWinner(urls[winningIndex]);
-          }}
+      {isFinished && showWinner && roomState.winningVideoId && (
+        <iframe
+          src={toEmbedUrl(
+            urls.find(v => v.id === roomState.winningVideoId)?.url || ""
+          )}
+          allowFullScreen
         />
-      )}
-
-      {winner && (
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <h2>🎉 Winning Video 🎉</h2>
-          <iframe
-            src={toEmbedUrl(winner.url)!}
-            width="560"
-            height="315"
-            allowFullScreen
-          />
-        </div>
       )}
     </div>
   );
