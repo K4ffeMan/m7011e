@@ -81,6 +81,7 @@ jobs:
       - name: Run backend Jest integration tests
         run: |
           cd backend
+          npm install --save-dev @types/jest
           npm test -- --runInBand
 
       - name: Setup Python for backend tests
