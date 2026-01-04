@@ -41,14 +41,6 @@ function Room() {
 
   const keycloak = getKeycloak();
 
-  const requireLogin = async () => {
-    if (!keycloak?.authenticated) {
-      await keycloak?.login();
-      return false;
-    }
-    return true;
-  };
-
   const roles =
     (keycloak?.tokenParsed as any)?.realm_access?.roles ?? [];
 
@@ -165,7 +157,11 @@ function Room() {
     try {
       await keyaxios.post(`/api/videos/${roomId}`, { url: youtubeUrl });
         setYoutubeUrl("");
-      }catch {
+      }catch (err: any){
+      if (err.response?.status === 401){
+        await getKeycloak().login();
+        return;
+      }
       setAlertMessage("Failed to add video");
       setAlertSeverity("error");
     }
