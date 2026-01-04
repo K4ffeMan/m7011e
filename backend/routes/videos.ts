@@ -11,18 +11,40 @@ router.get("/:roomId", async (req: Request, res: Response) => {
     WHERE id = $1`,
     [roomId]
   );
-  
-  const videos = await pool.query(
-    `SELECT id, url FROM watch.videos
-    WHERE room_id = $1`,
-    [roomId]
-  );
 
   if(room.rowCount == 0){
     return res.status(404).json({ error: "No room found" });
   }
 
-  res.json(videos.rows);
+  const videos = await pool.query(
+        `SELECT id, url FROM watch.videos
+        WHERE room_id = $1`,
+        [roomId]
+    );
+
+    const numbVotes = await pool.query(
+        `SELECT video_id, COUNT(*)::int AS votes FROM watch.votes
+        WHERE room_id = $1
+        GROUP BY video_id`,
+        [roomId]
+    );
+
+    const vote = new Map<number, number>();
+
+    for (const row of numbVotes.rows) {
+        vote.set(row.video_id, row.votes);
+    }
+    const videosfull = [];
+
+    for (const video of videos.rows) {
+        videosfull.push({
+            id: video.id,
+            url: video.url,
+            votes: vote.get(video.id) ?? 0,
+        });
+    }
+
+  res.json(videosfull);
 });
 
 
@@ -52,8 +74,6 @@ router.post("/:roomId", async (req: Request, res: Response) => {
         RETURNING id, url`,
         [roomId, url]
     );
-
-    console.log(video.rows[0]);
     
     res.json({ success: true, video: video.rows[0] });
   }catch(err: any){

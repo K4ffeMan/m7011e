@@ -9,7 +9,7 @@ router.get("/:roomId", async (req: Request, res: Response) => {
   const { roomId } = req.params;
 
   const room = await pool.query(
-    `SELECT voting_active
+    `SELECT game_state, winner_video
      FROM watch.rooms
      WHERE id = $1`,
     [roomId]
@@ -20,7 +20,10 @@ router.get("/:roomId", async (req: Request, res: Response) => {
   }
 
   res.json({
-    votingActive: room.rows[0].voting_active,
+    success: true,
+    roomId,
+    gameState: room.rows[0].game_state,
+    winning_video: room.rows[0].winner_video ?? null
   });
 });
 
@@ -30,14 +33,23 @@ router.post("/", authtest, async (req: Request, res: Response) => {
   const roomId = Math.random().toString(36).substring(2, 8);
   
   await pool.query(
-    `INSERT INTO watch.rooms (id, owner_id, voting_active)
+    `INSERT INTO watch.rooms (id, owner_id, game_state)
     VALUES ($1, $2, $3)`,
-    [roomId, userId, false]
+    [roomId, userId, "lobby"]
   );
+
+  const room = await pool.query(
+    `SELECT game_state, winner_video
+    FROM watch.rooms
+    WHERE id = $1`,
+    [roomId]
+  )
   
   res.status(201).json({
     success: true,
-    roomId
+    roomId,
+    gameState: room.rows[0].game_state,
+    winningVideoId: room.rows[0].winner_video ?? null
   });
 });
 
