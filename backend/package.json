@@ -4,6 +4,8 @@
     "description": "Node + Express backend for video rooms",
     "main": "server.ts",
     "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
         "test": "jest --runInBand"
     },
     "author": "Your Name",
