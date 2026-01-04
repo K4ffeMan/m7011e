@@ -14,7 +14,7 @@ app.get('/protected', getAuthMiddleware(), (req, res) => {
 
 describe('Mock JWT integration', () => {
     beforeAll(() => {
-        process.env.NODE_ENV = 'test'; // ensures authtest uses mockJwt
+        process.env.NODE_ENV = 'test';
     });
 
     it('returns a mock sub for testing', async () => {

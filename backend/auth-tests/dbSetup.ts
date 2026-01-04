@@ -1,24 +1,45 @@
-// testing-ci/dbSetup.ts
 import { pool as backendPool } from '../db/database';
 
-// Export pool so tests can use it
 export const pool = backendPool;
 
-// Create todos table if it does not exist
 export async function setupTestDatabase() {
+    // Drop schema to start clean
+    await pool.query(`DROP SCHEMA IF EXISTS watch CASCADE;`);
+    await pool.query(`CREATE SCHEMA watch;`);
+
+    // Rooms table
     await pool.query(`
-    CREATE TABLE IF NOT EXISTS todos (
-      todo_id SERIAL PRIMARY KEY,
-      title VARCHAR(200) NOT NULL,
-      description TEXT,
-      user_id INTEGER NOT NULL,
-      completed BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+    CREATE TABLE watch.rooms (
+      id VARCHAR PRIMARY KEY,
+      owner_id INT NOT NULL,
+      game_state VARCHAR DEFAULT 'lobby',
+      winner_video INT
+    );
+  `);
+
+    // Videos table
+    await pool.query(`
+    CREATE TABLE watch.videos (
+      id SERIAL PRIMARY KEY,
+      room_id VARCHAR REFERENCES watch.rooms(id) ON DELETE CASCADE,
+      url TEXT NOT NULL
+    );
+  `);
+
+    // Votes table
+    await pool.query(`
+    CREATE TABLE watch.votes (
+      room_id VARCHAR REFERENCES watch.rooms(id) ON DELETE CASCADE,
+      video_id INT REFERENCES watch.videos(id) ON DELETE CASCADE,
+      user_id INT,
+      PRIMARY KEY(room_id, video_id, user_id)
+    );
   `);
 }
 
-// Clean todos table before each test
+// Clean database before each test
 export async function cleanDatabase() {
-    await pool.query('DELETE FROM todos');
+    await pool.query('DELETE FROM watch.votes');
+    await pool.query('DELETE FROM watch.videos');
+    await pool.query('DELETE FROM watch.rooms');
 }
