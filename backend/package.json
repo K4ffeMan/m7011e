@@ -5,7 +5,7 @@
     "main": "server.ts",
     "scripts": {
         "build": "tsc",
-        "test": "jest --runInBand"
+        "test": "jest --config jest.config.js --runInBand"
     },
     "author": "Your Name",
     "license": "MIT",
