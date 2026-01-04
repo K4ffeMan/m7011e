@@ -41,25 +41,8 @@ const [alertSeverity, setAlertSeverity] = useState<
       pkceMethod: 'S256',
       checkLoginIframe: false
     }).then(authenticated => {
-      console.log('Access token:', keycloak.token);
       setAuthenticated(authenticated);
-      setLoading(false);
-
-      if (authenticated) {
-        // Load user profile
-        keycloak.loadUserProfile().then(profile => {
-          // Check if user has admin role
-          const isAdmin = keycloak.hasRealmRole('admin');
-          setUser({
-            ...profile,
-            isAdmin
-          });
-        });
-        setLoading(false);
-      }
-    }).catch(err => {
-      console.error('Keycloak initialization error:', err);
-      setError('Failed to initialize authentication');
+    }).finally(() => {
       setLoading(false);
     });
   }, []);

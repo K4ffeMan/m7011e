@@ -1,11 +1,11 @@
 import { Request, Response, Router } from "express";
-import { keycloakJwt } from "../auth/jwtAuth";
+import { authtest } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
 
 
-router.post("/:roomId/:videoId", keycloakJwt, async (req: Request, res: Response) => {
+router.post("/:roomId/:videoId", authtest, async (req: Request, res: Response) => {
   const userId = (req as any).auth?.sub;
   const roomId = req.params.roomId;
   const videoId = req.params.videoId;

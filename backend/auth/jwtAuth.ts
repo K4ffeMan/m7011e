@@ -15,7 +15,10 @@ export const keycloakJwt = expressjwt({
 
 export const mockJwt = (req: Request, res: Response, next: NextFunction) => {
   req.auth = {
-    sub: "mock-user"
+    sub: "mock-user",
+    realm_access: {
+      roles: []
+    }
   };
   next();
 }

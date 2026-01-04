@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getKeycloak } from "../auth/keycloak";
 import keyaxios from "../auth/keycloakaxios";
 import "./room.css";
 
@@ -38,6 +39,21 @@ function Room() {
   const isVoting = roomState.gameState === "voting";
   const isFinished = roomState.gameState === "finish";
 
+  const keycloak = getKeycloak();
+
+  const requireLogin = async () => {
+    if (!keycloak?.authenticated) {
+      await keycloak?.login();
+      return false;
+    }
+    return true;
+  };
+
+  const roles =
+    (keycloak?.tokenParsed as any)?.realm_access?.roles ?? [];
+
+  const isAdmin = roles.includes("admin");
+
   /* Fetch videos */
   useEffect(() => {
     const fetchVideos = async () => {
@@ -66,6 +82,8 @@ function Room() {
 
     return () => clearInterval(interval);
   }, [roomId]);
+
+  
 
   /* Poll room state */
   useEffect(() => {
@@ -103,7 +121,11 @@ function Room() {
   const startVote = async () => {
     try {
       await keyaxios.post(`/api/vote/start/${roomId}`);
-    } catch {
+    } catch (err: any){
+      if (err.response?.status === 401){
+        await getKeycloak().login();
+        return;
+      }
       setAlertMessage("Failed to start vote");
       setAlertSeverity("error");
     }
@@ -112,7 +134,11 @@ function Room() {
   const endVote = async () => {
     try {
       await keyaxios.post(`/api/vote/end/${roomId}`);
-    } catch {
+    } catch (err: any){
+      if (err.response?.status === 401){
+        await getKeycloak().login();
+        return;
+      }
       setAlertMessage("Failed to end vote");
       setAlertSeverity("error");
     }
@@ -121,7 +147,11 @@ function Room() {
   const castVote = async (videoId: number) => {
     try {
       await keyaxios.post(`/api/vote/${roomId}/${videoId}`);
-    } catch {
+    } catch (err: any){
+      if (err.response?.status === 401){
+        await getKeycloak().login();
+        return;
+      }
       setAlertMessage("Failed to vote");
       setAlertSeverity("error");
     }
@@ -140,6 +170,20 @@ function Room() {
       setAlertSeverity("error");
     }
   };
+
+  async function handleDeleteRoom() {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this room?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await keyaxios.delete(`/api/rooms/${roomId}`);
+      navigate("/");
+    } catch (err) {
+      alert("You are not allowed to delete this room.");
+    }
+  }
 
   const inviteLink = `${window.location.origin}/room/${roomId}`;
 
@@ -184,6 +228,15 @@ function Room() {
       )}
 
       <h1>Room: {roomId}</h1>
+
+      {isAdmin && (
+        <button
+          style={{ backgroundColor: "red", color: "white" }}
+          onClick={handleDeleteRoom}
+        >
+          Delete room
+        </button>
+      )}
 
       <Button
         variant="outlined"

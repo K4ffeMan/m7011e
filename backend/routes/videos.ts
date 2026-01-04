@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { authtest } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
@@ -48,7 +49,7 @@ router.get("/:roomId", async (req: Request, res: Response) => {
 });
 
 
-router.post("/:roomId", async (req: Request, res: Response) => {
+router.post("/:roomId", authtest, async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
   const { url } = req.body as { url: string };
   
