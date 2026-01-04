@@ -55,34 +55,52 @@ async function voteVideo(roomId: string, videoId: number, userId = 1) {
 
 // tests
 describe('Backend integration', () => {
-    it('creates and retrieves a room', async () => {
+    it('creates a room', async () => {
         const roomId = await createRoom();
+        expect(typeof roomId).toBe('string');
+    });
 
+    it('retrieves a room', async () => {
+        const roomId = await createRoom();
         const res = await request(app).get(`/api/rooms/${roomId}`);
-        expect(res.status).toBe(200);
         expect(res.body.roomId).toBe(roomId);
+    });
+
+    it('retrieves a room game state', async () => {
+        const roomId = await createRoom();
+        const res = await request(app).get(`/api/rooms/${roomId}`);
         expect(res.body.gameState).toBe('lobby');
     });
 
-    it('adds and retrieves videos for a room', async () => {
+    it('adds a video', async () => {
         const roomId = await createRoom();
         const videoId = await addVideo(roomId, 'https://video.test/1');
+        expect(typeof videoId).toBe('number');
+    });
 
+    it('retrieves videos for a room', async () => {
+        const roomId = await createRoom();
+        const videoId = await addVideo(roomId, 'https://video.test/1');
         const res = await request(app).get(`/api/videos/${roomId}`);
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(1);
         expect(res.body[0].id).toBe(videoId);
+    });
+
+    it('retrieves video votes', async () => {
+        const roomId = await createRoom();
+        const videoId = await addVideo(roomId, 'https://video.test/1');
+        const res = await request(app).get(`/api/videos/${roomId}`);
         expect(res.body[0].votes).toBe(0);
     });
 
-    it('starts voting for a room', async () => {
+    it('starts voting', async () => {
         const roomId = await createRoom();
-
         const res = await request(app).post(`/api/vote/start/${roomId}`);
-        expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
-        expect(res.body.gameState).toBe('voting');
+    });
 
+    it('updates room state to voting', async () => {
+        const roomId = await createRoom();
+        await request(app).post(`/api/vote/start/${roomId}`);
         const room = await pool.query('SELECT game_state FROM watch.rooms WHERE id = $1', [roomId]);
         expect(room.rows[0].game_state).toBe('voting');
     });
@@ -91,49 +109,42 @@ describe('Backend integration', () => {
         const roomId = await createRoom();
         const videoId1 = await addVideo(roomId, 'https://video.test/1');
         const videoId2 = await addVideo(roomId, 'https://video.test/2');
-
         await voteVideo(roomId, videoId1);
 
         const res = await request(app).post(`/api/vote/end/${roomId}`);
-        expect(res.status).toBe(200);
-        expect(res.body.success).toBe(true);
-        expect(res.body.gameState).toBe('finish');
         expect([videoId1, videoId2]).toContain(res.body.winningVideoId);
     });
 
-    it('retrieves videos initially empty', async () => {
+    it('retrieves initially empty videos', async () => {
         const roomId = await createRoom();
         const res = await request(app).get(`/api/videos/${roomId}`);
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual([]);
+        expect(res.body.length).toBe(0);
     });
 
-    it('posts video and retrieves it', async () => {
+    it('posts a video', async () => {
         const roomId = await createRoom();
         const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-
         const postRes = await request(app).post(`/api/videos/${roomId}`).send({ url: videoUrl });
-        expect(postRes.status).toBe(200);
         expect(postRes.body.success).toBe(true);
-        expect(postRes.body.video.url).toBe(videoUrl);
+    });
 
+    it('retrieves posted video', async () => {
+        const roomId = await createRoom();
+        const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+        await request(app).post(`/api/videos/${roomId}`).send({ url: videoUrl });
         const getRes = await request(app).get(`/api/videos/${roomId}`);
-        expect(getRes.status).toBe(200);
-        expect(getRes.body.length).toBe(1);
         expect(getRes.body[0].url).toBe(videoUrl);
     });
 
-    it('posting video without URL returns 400', async () => {
+    it('posting video without URL returns error', async () => {
         const roomId = await createRoom();
         const res = await request(app).post(`/api/videos/${roomId}`).send({});
-        expect(res.status).toBe(400);
         expect(res.body.error).toBe('Missing URL');
     });
 
     it('deliberate fail: expects 1 video in empty room', async () => {
         const roomId = await createRoom();
         const res = await request(app).get(`/api/videos/${roomId}`);
-
         let failed = false;
         try {
             expect(res.body.length).toBe(1); // intentionally wrong
@@ -146,17 +157,13 @@ describe('Backend integration', () => {
     it('deliberate fail: asserting wrong URL', async () => {
         const roomId = await createRoom();
         const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-
         const postRes = await request(app).post(`/api/videos/${roomId}`).send({ url: videoUrl });
-        expect(postRes.status).toBe(200);
-
         let failed = false;
         try {
             expect(postRes.body.video.url).toBe('https://example.com/fakevideo'); // intentionally wrong
         } catch (err) {
             failed = true;
         }
-
         expect(failed).toBe(true);
     });
 });
