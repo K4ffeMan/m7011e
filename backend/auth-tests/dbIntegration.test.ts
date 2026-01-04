@@ -1,4 +1,3 @@
-// auth-tests/dbIntegration.test.ts
 import request from 'supertest';
 import express from 'express';
 import { pool, setupTestDatabase, cleanDatabase } from '../auth-tests/dbSetup';
@@ -13,7 +12,7 @@ import votesRouter from '../routes/votes';
 const app = express();
 app.use(express.json());
 
-// ===== Jest hooks =====
+// jest hooks
 beforeAll(async () => {
     // Enable test mode before mounting routes
     process.env.NODE_ENV = 'test';
@@ -38,7 +37,7 @@ beforeEach(async () => {
     await cleanDatabase();
 });
 
-// ===== Helper functions =====
+// Helper funcs
 async function createRoom(userId = 1) {
     const roomId = Math.random().toString(36).substring(2, 8);
     await pool.query('INSERT INTO watch.rooms (id, owner_id, game_state) VALUES ($1, $2, $3)', [roomId, userId, 'lobby']);
@@ -54,7 +53,7 @@ async function voteVideo(roomId: string, videoId: number, userId = 1) {
     await pool.query('INSERT INTO watch.votes (room_id, video_id, user_id) VALUES ($1, $2, $3)', [roomId, videoId, userId]);
 }
 
-// ===== Tests =====
+// tests
 describe('Backend integration', () => {
     it('creates and retrieves a room', async () => {
         const roomId = await createRoom();
