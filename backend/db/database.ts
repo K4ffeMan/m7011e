@@ -28,7 +28,8 @@ export async function createTablesWatch() {
     `CREATE TABLE IF NOT EXISTS watch.rooms (
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,
-    voting_active BOOLEAN NOT NULL DEFAULT false,
+    game_state TEXT NOT NULL DEFAULT 'lobby',
+    winner_video INTEGER REFERENCES watch.videos(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );`
   );

@@ -13,17 +13,17 @@ router.post("/start/:roomId", async (req: Request, res: Response) => {
     [roomId]
   );
 
-  const votingstatus = await pool.query(
+  const roomState = await pool.query(
     `UPDATE watch.rooms
-    SET voting_active = true
-    WHERE id = $1
-    RETURNING voting_active`,
-    [roomId]
+    SET game_state = $1
+    WHERE id = $2
+    RETURNING game_state`,
+    ["voting", roomId]
   );
 
   return res.status(200).json({
     success: true,
-    votingActive: votingstatus.rows[0].voting_active,
+    gameState: roomState.rows[0].game_state,
   });
 });
 
