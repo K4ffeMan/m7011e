@@ -1,12 +1,12 @@
 // testing-ci/dbSetup.ts
-import { pool as backendPool } from "../backend/db/database";
+import { pool as backendPool } from '../db/database';
 
 // Export pool so tests can use it
 export const pool = backendPool;
 
 // Create todos table if it does not exist
 export async function setupTestDatabase() {
-  await pool.query(`
+    await pool.query(`
     CREATE TABLE IF NOT EXISTS todos (
       todo_id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
@@ -20,5 +20,5 @@ export async function setupTestDatabase() {
 
 // Clean todos table before each test
 export async function cleanDatabase() {
-  await pool.query("DELETE FROM todos");
+    await pool.query('DELETE FROM todos');
 }

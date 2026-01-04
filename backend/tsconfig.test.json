@@ -3,5 +3,5 @@
     "compilerOptions": {
         "types": ["node", "jest"]
     },
-    "include": ["../testing-ci/**/*.ts"]
+    "include": ["../auth-tests/**/*.ts"]
 }
