@@ -83,7 +83,7 @@ jobs:
       - name: Run backend Jest integration tests
         run: |
           cd backend
-          npm test -- --runInBand
+          NODE_PATH=$(pwd)/node_modules npm test -- --runInBand
 
       - name: Setup Python for backend tests
         uses: actions/setup-python@v4
