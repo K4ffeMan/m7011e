@@ -4,3 +4,5 @@ export const TEST_DB_CONFIG = {
     user: 'postgres',
     password: 'postgres',
 };
+
+// This is with accordance to the tutorials: Use real databases (test containers)

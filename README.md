@@ -98,3 +98,15 @@ How it works now is that the CI starts running the lint which pulls the the repo
 npm run build → production compile
 
 npm test → Jest integration tests (uses ts-jest)
+
+# Testing Integration
+
+#### Dependecies:
+
+- frontend is running
+- Docker compose is running
+- you are in /backend
+
+```
+npm test
+```
