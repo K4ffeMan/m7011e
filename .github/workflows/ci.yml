@@ -81,8 +81,6 @@ jobs:
           exit 1
 
       - name: Run backend Jest integration tests
-        env:
-          NODE_PATH: ./backend/node_modules
         run: |
           cd backend
           npm test -- --runInBand
