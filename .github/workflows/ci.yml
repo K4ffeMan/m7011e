@@ -58,6 +58,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
+          npm install
           npm ci
 
       - name: Build backend
