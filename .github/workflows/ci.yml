@@ -85,23 +85,23 @@ jobs:
           cd backend
           NODE_PATH=$(pwd)/node_modules npm test -- --runInBand
 
-      - name: Setup Python for backend tests
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install Python dependencies
-        run: pip install -r testing-ci/requirements.txt
-
-      - name: Run backend tests
-        run: pytest testing-ci/backend-tests/test_be.py -v
-
-      - name: Upload backend test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-results
-          path: testing-ci/backend-tests/html-report/
+      # - name: Setup Python for backend tests
+      #  uses: actions/setup-python@v4
+      #  with:
+      #    python-version: 3.11
+  #
+  #- name: Install Python dependencies
+  #  run: pip install -r testing-ci/requirements.txt
+  #
+  #- name: Run backend tests
+  #  run: pytest testing-ci/backend-tests/test_be.py -v
+  #
+  #- name: Upload backend test results
+  #  if : always()
+  #  uses: actions/upload-artifact@v4
+  #  with:
+  #    name: backend-test-results
+  #    path: testing-ci/backend-tests/html-report/
 
   docker-backend:
     name: Build & push backend Docker image

@@ -13,6 +13,6 @@
         "skipLibCheck": true
     },
     "files": ["auth/jwtauth.d.ts"],
-    "include": ["auth/**/*.ts", "auth/**/*.d.ts", "**/*.ts", "**/*.d.ts", "../tests/**/*.ts"],
+    "include": ["auth/**/*.ts", "auth/**/*.d.ts", "**/*.ts", "**/*.d.ts", "../tests/**/*.ts", "../testing-ci/dbSetup.ts"],
     "exclude": ["node_modules", "dist"]
 }
