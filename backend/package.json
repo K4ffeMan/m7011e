@@ -32,6 +32,11 @@
         "eslint-plugin-perfectionist": "^4.15.1",
         "prettier": "^3.6.2",
         "ts-node-dev": "^2.0.0",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "jest": "^30.2.0",
+        "ts-jest": "^29.4.6",
+        "@types/jest": "^30.0.0",
+        "supertest": "^7.1.4",
+        "@types/supertest": "^6.0.3"
     }
 }
