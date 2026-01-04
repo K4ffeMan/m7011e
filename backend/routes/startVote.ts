@@ -1,10 +1,11 @@
 import { Request, Response, Router } from "express";
+import { authtest } from "../auth/jwtAuth";
 import { pool } from "../db/database";
 
 const router = Router();
 
 
-router.post("/start/:roomId", async (req: Request, res: Response) => {
+router.post("/start/:roomId",authtest, async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
 
   const room = await pool.query(

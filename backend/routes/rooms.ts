@@ -53,4 +53,24 @@ router.post("/", authtest, async (req: Request, res: Response) => {
   });
 });
 
+router.delete("/:roomId", authtest, async (req: Request, res: Response) => {
+  const { roomId } = req.params;
+  const roles = req.auth?.realm_access?.roles;
+  const Admin = roles?.includes("admin");
+  console.log(roles);
+
+
+  if(!Admin){
+    return res.status(403).json({ error: "You need to be admin" });
+  }
+
+  await pool.query(
+    "DELETE FROM watch.rooms WHERE id = $1",
+    [roomId]
+  )
+  res.status(200).json({
+    success: true
+  })
+});
+
 export default router;

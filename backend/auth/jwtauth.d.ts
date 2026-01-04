@@ -3,9 +3,13 @@ declare global{
         interface Request{
             auth?:{
                 sub?: string;
+                realm_access?:{
+                    roles?: string[];
+                }
             }
         }
     }
 }
 
 export { };
+

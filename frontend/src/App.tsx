@@ -11,15 +11,6 @@ import keyaxios from "./auth/keycloakaxios";
 import Header from "./components/header";
 import Room from "./components/room";
 
-
-interface User {
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  isAdmin: boolean;
-}
-
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [count, setCount] = useState<number>(0);
@@ -27,9 +18,7 @@ function App() {
 const [alertSeverity, setAlertSeverity] = useState<
   "success" | "info" | "warning" | "error"
 >("info");
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -41,25 +30,8 @@ const [alertSeverity, setAlertSeverity] = useState<
       pkceMethod: 'S256',
       checkLoginIframe: false
     }).then(authenticated => {
-      console.log('Access token:', keycloak.token);
       setAuthenticated(authenticated);
-      setLoading(false);
-
-      if (authenticated) {
-        // Load user profile
-        keycloak.loadUserProfile().then(profile => {
-          // Check if user has admin role
-          const isAdmin = keycloak.hasRealmRole('admin');
-          setUser({
-            ...profile,
-            isAdmin
-          });
-        });
-        setLoading(false);
-      }
-    }).catch(err => {
-      console.error('Keycloak initialization error:', err);
-      setError('Failed to initialize authentication');
+    }).finally(() => {
       setLoading(false);
     });
   }, []);
@@ -126,10 +98,6 @@ const [alertSeverity, setAlertSeverity] = useState<
         element={
           <>
             {loading && <p>Loading authentication…</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {authenticated && user && (
-              <p>Welcome {user.username}</p>
-            )}
 
             <h1>Youtube Video Selector</h1>
 

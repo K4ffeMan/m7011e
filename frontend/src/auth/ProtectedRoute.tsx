@@ -1,35 +1,30 @@
 import type { PropsWithChildren } from "react";
 import { Navigate } from "react-router";
+import { getKeycloak } from "../auth/keycloak";
 
-export interface AuthUser {
-  user_id: number;
-  username: string;
-  firstname: string;
-  surname: string;
-  is_admin: boolean;
-}
-
-interface AuthUserProps {
-  user: AuthUser | null;
-  userLoading: boolean;
+interface Props {
   requireAdmin?: boolean;
-  requireUnauthed?: boolean;
 }
 
-export function ProtectedRoute({ children, user, userLoading, requireAdmin, requireUnauthed }: PropsWithChildren<AuthUserProps>) {
-  if (userLoading) {
-    return <h1>Loading...</h1>
-  }
-  
-  // Enforce noauth on login/register page
-  if (requireUnauthed && user !== null) {
-    return <Navigate to="/" replace />
+export function ProtectedRoute({
+  children,
+  requireAdmin,
+}: PropsWithChildren<Props>) {
+  const keycloak = getKeycloak();
+
+  // Not logged in
+  if (!keycloak?.authenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Enforce admin or general auth
-  else if (!requireUnauthed && (!user || (requireAdmin && !user.is_admin))) {
-    return <Navigate to="/login" />
+  if (requireAdmin) {
+    const roles =
+      (keycloak.tokenParsed as any)?.realm_access?.roles ?? [];
+
+    if (!roles.includes("admin")) {
+      return <Navigate to="/" replace />;
+    }
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
