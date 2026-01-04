@@ -29,7 +29,7 @@ export async function createTablesWatch() {
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,
     game_state TEXT NOT NULL DEFAULT 'lobby',
-    winner_video INTEGER REFERENCES watch.videos(id),
+    winner_video INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );`
   );
@@ -41,7 +41,7 @@ export async function createTablesWatch() {
     url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT unique_video_per_room
+    CONSTRAINT unique_video
     UNIQUE (room_id, url),
 
     FOREIGN KEY (room_id)
@@ -49,6 +49,17 @@ export async function createTablesWatch() {
       ON DELETE CASCADE
     );`
   );
+
+  await pool.query(
+    `ALTER TABLE watch.rooms
+     DROP CONSTRAINT IF EXISTS fk_win_vid;
+
+     ALTER TABLE watch.rooms
+     ADD CONSTRAINT fk_win_vid
+     FOREIGN KEY (winner_video)
+     REFERENCES watch.videos(id);
+    `
+  )
 
   await pool.query(
     `CREATE TABLE IF NOT EXISTS watch.votes (
