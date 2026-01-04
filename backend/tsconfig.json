@@ -1,18 +1,18 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
-  "compilerOptions": {
-    "target": "ES2020",                   
-    "module": "CommonJS",                 
-    "moduleResolution": "node",
-    "types": ["node"],
-    "outDir": "./dist",                     
-    "rootDir": "./",                        
-    "strict": true,                         
-    "esModuleInterop": true,               
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true                   
-  },
-  "files": ["auth/jwtauth.d.ts"],
-  "include": ["**/*.ts", "**/*.d.ts"],               
-  "exclude": ["node_modules", "dist"]     
+    "extends": "@tsconfig/node22/tsconfig.json",
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "types": ["node", "jest"],
+        "outDir": "./dist",
+        "rootDir": "./",
+        "strict": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
+    },
+    "files": ["auth/jwtauth.d.ts"],
+    "include": ["auth/**/*.ts", "auth/**/*.d.ts", "**/*.ts", "**/*.d.ts", "../tests/**/*.ts"],
+    "exclude": ["node_modules", "dist"]
 }
