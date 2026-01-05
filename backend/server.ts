@@ -12,7 +12,7 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000", "https://frontend-dev.ltu-m7011e-7.se"] }));
+app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000", "https://frontend-dev.ltu-m7011e-7.se", "https://frontend-dev.ltu-m7011e-7.se/"] }));
 app.use(bodyParser.json());
 // Routes
 app.use("/api/videos", videosRouter);
