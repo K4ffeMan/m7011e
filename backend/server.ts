@@ -1,4 +1,3 @@
-import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import { createTablesWatch, testConnection } from "./db/database";
@@ -12,8 +11,11 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000", "https://frontend-dev.ltu-m7011e-7.se", "https://frontend-dev.ltu-m7011e-7.se/"] }));
-app.use(bodyParser.json());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+app.options("*", cors());
 // Routes
 app.use("/api/videos", videosRouter);
 app.use("/api/vote", startVotesRouter);
