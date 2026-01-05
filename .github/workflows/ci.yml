@@ -149,6 +149,7 @@ jobs:
       - name: Build frontend image
         run: |
           docker build \
+            --build-arg VITE_API_URL=http://backend.backend-dev.svc.cluster.local \
             -t ghcr.io/k4ffeman/frontend:latest \
             ./frontend
 
