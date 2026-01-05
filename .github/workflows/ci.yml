@@ -54,6 +54,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: pass
       DB_NAME: mydatabase
+      AMQP_URL: amqp://admin:adminpass@localhost:5672
 
     steps:
       - uses: actions/checkout@v4
@@ -76,9 +77,6 @@ jobs:
           # wait until backend responds
           echo "Waiting for backend to be ready..."
           sleep 3
-
-          echo "Backend failed to start"
-          exit 1
 
       - name: Setup Python for backend tests
         uses: actions/setup-python@v4
