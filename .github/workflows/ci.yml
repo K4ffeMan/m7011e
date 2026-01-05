@@ -77,6 +77,15 @@ jobs:
           # wait until backend responds
           echo "Waiting for backend to be ready..."
           sleep 3
+      
+      - name: Start rabbitmq-worker
+        run: |
+          cd backend
+          npm run build  # start server in background
+          NODE_ENV=test node dist/rabbitmq.js
+          # wait until backend responds
+          echo "Waiting for backend to be ready..."
+          sleep 3
 
       - name: Setup Python for backend tests
         uses: actions/setup-python@v4
