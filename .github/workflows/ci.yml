@@ -38,6 +38,14 @@ jobs:
           POSTGRES_DB: mydatabase
         ports:
           - 5432:5432
+      rabbitmq:
+        image: rabbitmq:3-management
+        env:
+          RABBITMQ_DEFAULT_USER: admin
+          RABBITMQ_DEFAULT_PASS: adminpass
+        ports:
+          - "5672:5672"
+          - "15672:15672"
     needs: lint
     env:
       BASE_URL: http://localhost:5000
@@ -46,6 +54,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: pass
       DB_NAME: mydatabase
+      AMQP_URL: amqp://admin:adminpass@localhost:5672
 
     steps:
       - uses: actions/checkout@v4
@@ -67,16 +76,16 @@ jobs:
           NODE_ENV=test PORT=5000 node dist/server.js &
           # wait until backend responds
           echo "Waiting for backend to be ready..."
-          for i in {1..20}; do
-            if curl -f http://localhost:5000/health; then
-              echo "Backend is ready"
-              exit 0
-            fi
-            sleep 1
-          done
-
-          echo "Backend failed to start"
-          exit 1
+          sleep 3
+      
+      - name: Start rabbitmq-worker
+        run: |
+          cd backend
+          npm run build  # start server in background
+          NODE_ENV=test node dist/rabbitmq.js &
+          # wait until backend responds
+          echo "Waiting for backend to be ready..."
+          sleep 3
 
       - name: Setup Python for backend tests
         uses: actions/setup-python@v4

@@ -11,6 +11,10 @@ export const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
+pool.on("error", (err) =>{
+  console.error("Database crashed", err);
+});
+
 export async function testConnection() {
   try {
     console.log("Connected to PostgreSQL");
