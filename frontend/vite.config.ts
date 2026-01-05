@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      "https://frontend-dev.ltu-m7011e-7.se"
+      "frontend-dev.ltu-m7011e-7.se"
     ],
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // your backend URL
+        target: "http://backend:5000", // your backend URL
         changeOrigin: true,
         secure: false,
       },
@@ -20,7 +20,7 @@ export default defineConfig({
   preview: {
     host: true,
     allowedHosts: [
-      "https://frontend-dev.ltu-m7011e-7.se",
+      "frontend-dev.ltu-m7011e-7.se",
     ],
   },
 });
