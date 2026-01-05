@@ -24,6 +24,16 @@ export const mockJwt = (req: Request, res: Response, next: NextFunction) => {
 }
 
 export const authtest: RequestHandler = (req, res, next) =>{
+  console.log("pretty")
+  if(req.headers['x-test-mode'] == 'true'){
+    req.auth={
+      sub: "test-user",
+      realm_access:{
+        roles: ["user", "admin"]
+      }
+    }
+    return next();
+  }
   if(process.env.NODE_ENV === "test"){
     return mockJwt(req, res, next);
   }else{

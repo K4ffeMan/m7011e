@@ -11,14 +11,10 @@ import votesRouter from "./routes/votes";
 const app = express();
 const PORT = 5000;
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
-
 // Middleware
 app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000"] }));
 app.use(bodyParser.json());
-
+console.log("hej hej")
 // Routes
 app.use("/api/videos", videosRouter);
 app.use("/api/vote", startVotesRouter);

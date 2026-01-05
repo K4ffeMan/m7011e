@@ -60,11 +60,11 @@ router.get("/:roomId", async (req: Request, res: Response) => {
 router.post("/:roomId", authtest, async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
   const { url } = req.body as { url: string };
-  const channel = await getChannel();
 
   if(!url){
     return res.status(400).json({error: "missing a url"})
   }
+  const channel = await getChannel();
   
     channel.sendToQueue(
       "video",
