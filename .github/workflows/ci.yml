@@ -76,7 +76,6 @@ jobs:
           # wait until backend responds
           echo "Waiting for backend to be ready..."
           sleep 3
-          done
 
           echo "Backend failed to start"
           exit 1
