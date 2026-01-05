@@ -17,4 +17,10 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    host: true,
+    allowedHosts: [
+      "https://frontend-dev.ltu-m7011e-7.se",
+    ],
+  },
 });
