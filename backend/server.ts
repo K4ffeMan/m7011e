@@ -14,7 +14,6 @@ const PORT = 5000;
 // Middleware
 app.use(cors({ origin: ["http://localhost:5173", "http://frontend:3000"] }));
 app.use(bodyParser.json());
-console.log("hej hej")
 // Routes
 app.use("/api/videos", videosRouter);
 app.use("/api/vote", startVotesRouter);
