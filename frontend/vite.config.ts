@@ -5,12 +5,18 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000", // your backend URL
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   preview: {
     host: true,
     allowedHosts: [
-      "https://frontend-dev.ltu-m7011e-7.se"
+      "frontend-dev.ltu-m7011e-7.se"
     ],
-  }
+  },
 });
