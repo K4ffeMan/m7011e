@@ -50,8 +50,6 @@ router.post("/end/:roomId", async (req: Request, res: Response) => {
       return res.status(400).json({error: "no votes"})
     }
 
-    console.log(weightVoting)
-
     const winner = weightVoting[Math.floor(Math.random()* weightVoting.length)];
 
     const room = await pool.query(

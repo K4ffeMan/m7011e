@@ -72,7 +72,6 @@ router.post("/", authtest, async (req: Request, res: Response) => {
     const { roomId } = req.params;
     const roles = req.auth?.realm_access?.roles;
     const Admin = roles?.includes("admin");
-    console.log(roles);
 
 
     if(!Admin){
