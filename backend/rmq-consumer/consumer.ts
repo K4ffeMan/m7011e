@@ -1,12 +1,10 @@
-import amqp from "amqplib";
 import { castVote } from "../db/votes";
+import { getChannel } from "../rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
 
 export async function voteConsume(){
-    const connection = await amqp.connect(AMQP_URL);
-    
-    const channel = await connection.createChannel();
+    const channel = await getChannel();
 
     await channel.assertQueue("votes", {durable: true});
     
@@ -25,6 +23,7 @@ export async function voteConsume(){
                 await castVote(incom.roomId, incom.videoId, incom.userId);
 
                 channel.ack(msg);
+                
             }catch{
                 console.error("Failed to consume");
                 channel.nack(msg, false, true);
