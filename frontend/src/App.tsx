@@ -21,6 +21,7 @@ const [alertSeverity, setAlertSeverity] = useState<
   const [loading, setLoading] = useState<boolean>(true);
 
   const navigate = useNavigate();
+  console.log(import.meta.env.VITE_API_URL);
 
   useEffect(() => {
     const keycloak = getKeycloak();
@@ -39,6 +40,7 @@ const [alertSeverity, setAlertSeverity] = useState<
   const goToRandomRoom = async (): Promise<void> => {
     
     try {
+      
       const res = await keyaxios.post(`/api/rooms/`);
       if (res.data.success) {
         navigate(`/room/${res.data.roomId}`);

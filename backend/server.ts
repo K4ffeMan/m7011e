@@ -1,3 +1,4 @@
+import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import { createTablesWatch, testConnection } from "./db/database";
@@ -15,7 +16,8 @@ app.use(cors({
   origin: true,
   credentials: true,
 }));
-app.options("*", cors());
+app.options("*", cors())
+app.use(bodyParser.json());
 // Routes
 app.use("/api/videos", videosRouter);
 app.use("/api/vote", startVotesRouter);

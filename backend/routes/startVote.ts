@@ -5,7 +5,7 @@ import { pool } from "../db/database";
 const router = Router();
 
 
-router.post("/start/:roomId",authtest, async (req: Request, res: Response) => {
+router.post("/start/:roomId", authtest, async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
 
   const room = await pool.query(
