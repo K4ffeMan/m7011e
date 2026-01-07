@@ -11,6 +11,8 @@ export async function videoConsume(){
     
     await channel.prefetch(1);
 
+    console.log("video consumer started")
+
     channel.consume(
         "video",
         async (msg) => {

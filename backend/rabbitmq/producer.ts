@@ -8,6 +8,7 @@ export async function getChannel(): Promise<amqp.Channel>{
         return channel;
     }
     try{
+        console.log("creating connection from producer")
         const connection = await amqp.connect(AMQP_URL);
 
         channel = await connection.createChannel();
