@@ -24,7 +24,6 @@ export const mockJwt = (req: Request, res: Response, next: NextFunction) => {
 }
 
 export const authtest: RequestHandler = (req, res, next) =>{
-  console.log("pretty")
   if(req.headers['x-test-mode'] == 'true'){
     req.auth={
       sub: "test-user",

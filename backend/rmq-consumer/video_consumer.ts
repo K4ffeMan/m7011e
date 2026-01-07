@@ -1,13 +1,11 @@
-import amqp from "amqplib";
 import { addVideo } from "../db/video";
+import { getChannel } from "../rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
 
 export async function videoConsume(){
-    
-    const connection = await amqp.connect(AMQP_URL);
 
-    const channel = await connection.createChannel();
+    const channel = await getChannel();
 
     await channel.assertQueue("video", {durable: true});
     
