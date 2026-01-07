@@ -9,7 +9,7 @@ export async function videoConsume(){
 
     await channel.assertQueue("video", {durable: true});
     
-    await channel.prefetch(1);
+    await channel.prefetch(5);
 
     console.log("video consumer started")
 
@@ -21,7 +21,7 @@ export async function videoConsume(){
             }
             try{
                 const incom = JSON.parse(msg.content.toString());
-
+        
                 await addVideo(incom.roomId, incom.url);
 
                 channel.ack(msg);
@@ -30,8 +30,7 @@ export async function videoConsume(){
                     channel.ack(msg);
                     return;
                 }
-                console.error("Failed to consume");
-                channel.nack(msg, false, true);
+                channel.nack(msg, false, false);
             }
         }
     )
