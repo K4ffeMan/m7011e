@@ -8,9 +8,10 @@ export async function voteConsume(){
 
     await channel.assertQueue("votes", {durable: true});
     
-    await channel.prefetch(1);
+    await channel.prefetch(5);
     
 
+    console.log("vote consumer started")
     channel.consume(
         "votes",
         async (msg) => {
@@ -19,14 +20,13 @@ export async function voteConsume(){
             }
             try{
                 const incom = JSON.parse(msg.content.toString());
-
+                console.log("adding vdieo")
                 await castVote(incom.roomId, incom.videoId, incom.userId);
-
+                console.log("added video")
                 channel.ack(msg);
                 
             }catch{
-                console.error("Failed to consume");
-                channel.nack(msg, false, true);
+                channel.nack(msg, false, false);
             }
         }
     )
