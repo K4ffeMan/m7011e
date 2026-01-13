@@ -25,8 +25,9 @@ export const mockJwt = (req: Request, res: Response, next: NextFunction) => {
 
 export const authtest: RequestHandler = (req, res, next) =>{
   if(req.headers['x-test-mode'] == 'true'){
+    const randId = Math.random().toString(36).substring(2, 8);
     req.auth={
-      sub: "test-user",
+      sub: `test-user-${randId}`,
       realm_access:{
         roles: ["user", "admin"]
       }

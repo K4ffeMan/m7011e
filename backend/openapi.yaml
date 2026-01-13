@@ -1,0 +1,185 @@
+openapi: '3.1.1'
+info:
+  title: Youtube API
+  description: API spec for Youtube
+  version: 0.1.0
+servers: 
+  - url: http://localhost:5000
+    description: Local development with docker
+  - url: https://backend-dev.ltu-m7011e-7.se
+    description: development with argocd
+
+components:
+  securitySchemes:
+    KeycloakAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: keycloak token have issues
+  schemas:
+    Room:
+      type: object
+      required:
+        - id
+        - ownerId
+        - game_state
+      properties:
+        id: 
+          type: string
+          description: The room needs to have a unique id
+          example: "ght56g"
+        ownerId:
+          type: string
+          description: The room needs to be connected to a user_id jwt(sub)
+          example: "fhuevsbguisgh-385902583-ajiveinto"
+        game_state:
+          type: string
+          description: We need to know in which state the website is
+          enum:
+            - lobby
+            - voting
+            - finish
+          example: lobby
+    Video:
+      type: object
+      required:
+        - roomId
+        - url
+      properties:
+        roomId:
+          type: string
+          description: A video need to have a roomId which it is connected to
+          example: "ght56g"
+        url:
+          type: string
+          description: A youtube url which can be shown to the users
+          example: "https://www.youtube.com/watch?v=EQTZNtibL3s"
+    Vote:
+      type: object
+      required:
+        - roomId
+        - videoId
+        - userId
+      properties:
+        roomId:
+          type: string
+          description: A video need to have a roomId which it is connected to
+          example: "ght56g"
+        videoId:
+          type: integer
+          description: The vote needs to know on which video
+          example: 5
+        userId:
+          type: string
+          description: A user should not be able to vote twice. So it needs to know the user
+          example: "fhuevsbguisgh-385902583-ajiveinto"
+    createRoomRequest:
+      type: object
+      required:
+        - ownerId
+      properties:
+        ownerId:
+          type: string
+          description: The room needs to be connected to a user_id jwt(sub)
+          example: "fhuevsbguisgh-385902583-ajiveinto"
+    roomResponse:
+      type: object
+      required:
+        - roomId
+        - gameState
+      properties:
+        roomId:
+          type: string
+          description: Id for the room
+          example: "ght56g"
+        gameState:
+          type: string
+          description: game state for the room
+          enum:
+            - lobby
+            - voting
+            - finish
+        winningVideoId:
+          description: winning video which can be null
+          oneOf:
+            - type: integer
+            - type: "null"
+          example: 5
+    databaseServiceUnavailable:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 503
+        message:
+          type: string
+          example: "Database temporarily unavailable"
+    roomNotFound:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "room not found"
+
+paths:
+  /api/rooms:
+    post:
+      description: Create a new room with random id
+      security:
+        - KeycloakAuth: []
+      
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/createRoomRequest"
+      responses:
+        "201":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/roomResponse"
+        "503":
+          description: Database temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/databaseServiceUnavailable"
+        "401":
+          description: "unauthorized"
+
+  /api/rooms/{roomId}:
+    get:
+      description: User can join a room      
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "ght56g"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/roomResponse"
+        "503":
+          description: Database temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/databaseServiceUnavailable"
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/roomNotFound"
+
+        
