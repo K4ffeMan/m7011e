@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "dotenv": "^17.2.3",
-    "keycloak-js": "^26.2.2"
+    "keycloak-js": "^26.2.2",
+    "prom-client": "^15.1.3"
   }
 }
