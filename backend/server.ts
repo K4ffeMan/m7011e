@@ -17,15 +17,22 @@ client.collectDefaultMetrics();
 const request_count = new client.Counter({
   name: 'http_requests_total',
   help: 'total HTTTP requests',
-  labelNames: ['method', 'endpoint', 'status', 'service'],
+  labelNames: ['method', 'action', 'status', 'service'],
 })
 
 const request_duration = new client.Histogram({
   name: 'http_request_duration_seconds',
   help: 'http request latency in seconds',
-  labelNames: ['method', 'endpoint', 'service'],
+  labelNames: ['method', 'action', 'service'],
   buckets: [0.05, 0.1, 0.25, 0.5, 1]
 })
+
+function act(action: string){
+  return(req: any, _res: any, next: any) => {
+    req.action = action;
+    next();
+  };
+}
 
 app.use((req, res, next)=>{
   if(req.path == "/metrics"){
@@ -36,17 +43,19 @@ app.use((req, res, next)=>{
   res.on("finish", () => {
     const endDiff = process.hrtime(start);
     let duration = endDiff[0] + endDiff[1]/1000000000
+    let action: string;
+    console.log(req.action);
 
     request_count.labels(
       req.method,
-      req.path,
+      String(req.action),
       String(res.statusCode),
       "backend"
     ).inc();
 
     request_duration.labels(
       req.method,
-      req.path,
+      String(req.action),
       "backend"
     ).observe(duration)
   });
@@ -68,11 +77,11 @@ app.use(cors({
 app.options("*", cors())
 app.use(bodyParser.json());
 // Routes
-app.use("/api/videos", videosRouter);
-app.use("/api/vote", startVotesRouter);
-app.use("/api/vote", endVotesRouter);
-app.use("/api/rooms", roomsrouter);
-app.use("/api/vote", votesRouter);
+app.use("/api/videos", act("videos"), videosRouter);
+app.use("/api/vote", act("start"), startVotesRouter);
+app.use("/api/vote", act("end"), endVotesRouter);
+app.use("/api/rooms", act("room"), roomsrouter);
+app.use("/api/vote", act("vote"), votesRouter);
 
 
 app.listen(PORT, () => {
