@@ -1,5 +1,5 @@
-import client from "prom-client";
 import { addVideo } from "../db/video";
+import { rabbitmq_messages_rejected } from "../rabbitmq";
 import { getChannel } from "../rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
@@ -13,11 +13,6 @@ export async function videoConsume(){
     await channel.prefetch(5);
 
     console.log("video consumer started")
-    const rabbitmq_messages_rejected = new client.Counter({
-        name: 'rabbitmq_messages_rejected',
-        help: 'Rabbitmq messages rejected',
-        labelNames: ['action', 'service']
-    })
 
     channel.consume(
         "video",
@@ -29,13 +24,15 @@ export async function videoConsume(){
                 const incom = JSON.parse(msg.content.toString());
         
                 await addVideo(incom.roomId, incom.url);
+
                 channel.ack(msg);
             }catch(err: any){
                 if(err.message === "Video exists in room"){
                     channel.ack(msg);
                     return;
                 }
-                rabbitmq_messages_rejected.labels("video", "video-consumer").inc();
+                console.log("video failed", err)
+                rabbitmq_messages_rejected.labels("vote", "video-consumer").inc();
                 channel.ack(msg);
             }
         }

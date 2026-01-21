@@ -6,7 +6,6 @@ import string
 url = os.getenv('ORDER_SERVICE_URL', 'http://localhost:5000')
 headers = {"X-Test-Mode": "true"}
 youtube_link = string.ascii_letters + string.digits
-videos = []
 error_rate = 0.05
 def random_youtube_id():
     link = "".join(random.choice(youtube_link) for _ in range(11))
@@ -29,7 +28,7 @@ def generate_http_traffic():
                 else:
                     #get room
                     requests.get(f"{url}/api/rooms/{roomId}", verify=False, timeout=4)
-                print("successfully got room")
+                    print("successfully got room")
                 #Add videos
                 for _ in range(40):
                     if random.random() < error_rate:
@@ -42,18 +41,17 @@ def generate_http_traffic():
                         body = {"url": video_url}
                         response = requests.post(f"{url}/api/videos/{roomId}", json=body, headers=headers, verify=False, timeout=4)
                         print("video added", response.status_code)
-                if random.random() < error_rate:
-                    response = requests.get(f"{url}/api/videos/vvsevevsvd", verify=False, timeout=4)
-                    print("No video found", response.status_code)
-                else:
-                    res = requests.get(f"{url}/api/videos/{roomId}", verify=False, timeout=4)
-                    if res.status_code == 200 or res.status_code == 201:
-                        videos = res.json()
-                        print("got the videos") 
+                videos = []
+                res = requests.get(f"{url}/api/videos/{roomId}", verify=False, timeout=4)
+                if res.status_code == 200 or res.status_code == 201:
+                    print(res.json())
+                    videos = res.json()
+                    print("got the videos")
+                
                 video_ids = []
                 for video in videos:
                     video_ids.append(video["id"])
-                if random.random() < 0.9:
+                if random.random() < error_rate:
                     response = requests.post(f"{url}/api/vote/start/fsgdgsdbs", headers=headers, verify=False, timeout=4)
                     print("Could not start video", response.status_code)
                 else:
@@ -68,7 +66,7 @@ def generate_http_traffic():
                     else:
                         requests.post(f"{url}/api/vote/{roomId}/{random.choice(video_ids)}", headers=headers, verify=False, timeout=4)
                         print("voted")
-                if random.random() < 0.9:
+                if random.random() < error_rate:
                     response = requests.post(f"{url}/api/vote/end/sgejgoeg4", headers=headers, verify=False, timeout=4)
                     print("Failed to end vote", response.status_code)
                 else:
