@@ -7,19 +7,21 @@ export async function getChannel(): Promise<amqp.Channel>{
     if(channel){
         return channel;
     }
-    try{
-        console.log("creating connection from producer")
-        const connection = await amqp.connect(AMQP_URL);
+    while(true){
+        try{
+            console.log("creating connection from producer")
+            const connection = await amqp.connect(AMQP_URL);
 
-        channel = await connection.createChannel();
+            channel = await connection.createChannel();
 
-        await channel.assertQueue("video", {durable: true});
-        await channel.assertQueue("votes", {durable: true});
-        
-
-        return channel;
-    }catch(err: any) {
-        console.error("Rabbitmq does not seem to work")
-        throw err;
+            await channel.assertQueue("video", {durable: true});
+            await channel.assertQueue("votes", {durable: true});
+            
+            console.log("connection works")
+            return channel;
+        }catch(err: any) {
+            console.error("Let's retry")
+            await new Promise(r => setTimeout(r, 4000));
+        }
     }
 }
