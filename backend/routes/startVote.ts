@@ -14,6 +14,10 @@ router.post("/start/:roomId", authtest, async (req: Request, res: Response) => {
     [roomId]
   );
 
+  if (room.rowCount === 0) {
+    return res.status(404).json({ error: "Room not found" });
+  }
+
   const roomState = await pool.query(
     `UPDATE watch.rooms
     SET game_state = $1

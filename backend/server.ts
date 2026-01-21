@@ -27,6 +27,20 @@ const request_duration = new client.Histogram({
   buckets: [0.05, 0.1, 0.25, 0.5, 1]
 })
 
+const request_abort = new client.Counter({
+  name: 'http_requests_aborted_total',
+  help: 'Requests aborted',
+  labelNames: ['method', 'action', 'service']
+})
+
+const rabbitmq_messages_rejected = new client.Counter({
+  name: 'rabbitmq_messages_rejected',
+  help: 'Rabbitmq messages rejected',
+  labelNames: ['action', 'service']
+})
+
+
+
 function act(action: string){
   return(req: any, _res: any, next: any) => {
     req.action = action;
@@ -39,6 +53,10 @@ app.use((req, res, next)=>{
     return next();
   }
   const start = process.hrtime();
+
+  req.on("aborted", () => {
+    request_abort.labels(req.method, String(req.action), "backend").inc();
+  })
 
   res.on("finish", () => {
     const endDiff = process.hrtime(start);
