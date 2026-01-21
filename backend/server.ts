@@ -33,7 +33,7 @@ const request_abort = new client.Counter({
   labelNames: ['method', 'action', 'service']
 })
 
-const rabbitmq_messages_rejected = new client.Counter({
+export const rabbitmq_messages_rejected = new client.Counter({
     name: 'rabbitmq_messages_rejected',
     help: 'Rabbitmq messages rejected',
     labelNames: ['action', 'service']

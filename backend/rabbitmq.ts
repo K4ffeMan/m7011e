@@ -3,8 +3,7 @@ import { videoConsume } from "./rmq-consumer/video_consumer";
 
 async function startRabbit(){
     voteConsume();
-    videoConsume();
-    
+    videoConsume();   
 }
 
 startRabbit();

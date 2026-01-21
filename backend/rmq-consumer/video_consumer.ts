@@ -1,6 +1,6 @@
 import { addVideo } from "../db/video";
-import { rabbitmq_messages_rejected } from "../rabbitmq";
 import { getChannel } from "../rabbitmq/producer";
+import { rabbitmq_messages_rejected } from "../server";
 
 const AMQP_URL = process.env.AMQP_URL!;
 
