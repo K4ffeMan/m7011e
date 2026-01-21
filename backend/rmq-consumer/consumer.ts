@@ -1,6 +1,5 @@
 import { castVote } from "../db/votes";
 import { getChannel } from "../rabbitmq/producer";
-import { rabbitmq_messages_rejected } from "../server";
 
 const AMQP_URL = process.env.AMQP_URL!;
 
@@ -26,7 +25,6 @@ export async function voteConsume(){
                 channel.ack(msg);
                 
             }catch{
-                rabbitmq_messages_rejected.labels("vote", "vote-consumer").inc();
                 channel.ack(msg);
             }
         }
