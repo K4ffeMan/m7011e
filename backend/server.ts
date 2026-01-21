@@ -34,12 +34,10 @@ const request_abort = new client.Counter({
 })
 
 const rabbitmq_messages_rejected = new client.Counter({
-  name: 'rabbitmq_messages_rejected',
-  help: 'Rabbitmq messages rejected',
-  labelNames: ['action', 'service']
-})
-
-
+    name: 'rabbitmq_messages_rejected',
+    help: 'Rabbitmq messages rejected',
+    labelNames: ['action', 'service']
+});
 
 function act(action: string){
   return(req: any, _res: any, next: any) => {
@@ -76,6 +74,17 @@ app.use((req, res, next)=>{
       String(req.action),
       "backend"
     ).observe(duration)
+
+    request_abort.labels(
+      req.method,
+      String(req.action),
+      "backend"
+    ).inc();
+
+    rabbitmq_messages_rejected.labels(
+      String(req.action),
+      "backend"
+    ).inc();
   });
   next();
 })
