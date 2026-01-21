@@ -44,7 +44,6 @@ def generate_http_traffic():
                 videos = []
                 res = requests.get(f"{url}/api/videos/{roomId}", verify=False, timeout=4)
                 if res.status_code == 200 or res.status_code == 201:
-                    print(res.json())
                     videos = res.json()
                     print("got the videos")
                 
@@ -54,6 +53,7 @@ def generate_http_traffic():
                 if random.random() < error_rate:
                     response = requests.post(f"{url}/api/vote/start/fsgdgsdbs", headers=headers, verify=False, timeout=4)
                     print("Could not start video", response.status_code)
+                    continue
                 else:
                     #Start vote
                     requests.post(f"{url}/api/vote/start/{roomId}", headers=headers, verify=False, timeout=4)
@@ -61,12 +61,12 @@ def generate_http_traffic():
                 #Vote
                 for _ in range(60):
                     if random.random() < error_rate:
-                        response = requests.post(f"{url}/api/vote/{roomId}/23585235p", headers=headers, verify=False, timeout=4)
+                        response = requests.post(f"{url}/api/vote/304956034/23585235p", headers=headers, verify=False, timeout=4)
                         print("Can not vote on a video that does not exist", response.status_code)
                     else:
                         requests.post(f"{url}/api/vote/{roomId}/{random.choice(video_ids)}", headers=headers, verify=False, timeout=4)
                         print("voted")
-                if random.random() < error_rate:
+                if random.random() < 0.9:
                     response = requests.post(f"{url}/api/vote/end/sgejgoeg4", headers=headers, verify=False, timeout=4)
                     print("Failed to end vote", response.status_code)
                 else:

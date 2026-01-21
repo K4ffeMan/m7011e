@@ -1,5 +1,4 @@
 import { addVideo } from "../db/video";
-import { rabbitmq_messages_rejected } from "../rabbitmq";
 import { getChannel } from "../rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
@@ -32,7 +31,6 @@ export async function videoConsume(){
                     return;
                 }
                 console.log("video failed", err)
-                rabbitmq_messages_rejected.labels("vote", "video-consumer").inc();
                 channel.ack(msg);
             }
         }
