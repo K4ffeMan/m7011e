@@ -104,10 +104,9 @@ jobs:
         run: |
           docker compose up -d --build
 
-      - name: Docker status
+      - name: Docker status room
         run: |
-          docker compose ps
-          docker ps -a
+          docker compose logs room
       
       - name: Wait for docker to finish up
         run: | 
