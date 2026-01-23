@@ -19,6 +19,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: group7password
       POSTGRES_DB: mydatabase
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
+      interval: 3s
+      retries: 10
     ports:
       - "5433:5432"
     volumes:
@@ -34,7 +38,8 @@ services:
     env_file:
       - ./backend/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -47,7 +52,8 @@ services:
     env_file:
       - ./room-service/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -60,7 +66,8 @@ services:
     env_file:
       - ./video-service/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -73,7 +80,8 @@ services:
     env_file:
       - ./start-vote-service/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -86,7 +94,8 @@ services:
     env_file:
       - ./vote-service/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -99,7 +108,8 @@ services:
     env_file:
       - ./end-vote-service/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
