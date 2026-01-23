@@ -94,7 +94,10 @@ jobs:
       - name: start docker compose
         run: |
           docker compose up -d --build
-          sleep 10
+      
+      - name: Wait for docker to finish up
+        run: | 
+          sleep 20
 
       - name: Setup Python for backend tests
         uses: actions/setup-python@v4
