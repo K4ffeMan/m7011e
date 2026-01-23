@@ -1,5 +1,5 @@
-import { castVote } from "../db/votes";
-import { getChannel } from "../rabbitmq/producer";
+import { castVote } from "./db/vote";
+import { getChannel } from "./rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
 

@@ -1,11 +1,11 @@
 {
-  "name": "room-service",
+  "name": "video-rabbitmq",
   "version": "1.0.0",
-  "description": "room-service for youtube vote system",
-  "main": "rooms.ts",
+  "description": "video-rabbitmq-worker for youtube vote system",
+  "main": "rabbitmq.ts",
   "scripts": {
-    "start": "node dist/rooms.js",
-    "dev": "ts-node-dev --respawn --transpile-only rooms.ts",
+    "start": "node dist/rabbitmq.js",
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
     "worker": "ts-node-dev --respawn --transpile-only rabbitmq.ts",
     "type-check": "tsc --noEmit",
     "build": "tsc",

@@ -1,5 +1,5 @@
-import { addVideo } from "../db/video";
-import { getChannel } from "../rabbitmq/producer";
+import { addVideo } from "./db/video";
+import { getChannel } from "./rabbitmq/producer";
 
 const AMQP_URL = process.env.AMQP_URL!;
 

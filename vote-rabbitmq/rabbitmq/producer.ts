@@ -14,8 +14,7 @@ export async function getChannel(): Promise<amqp.Channel>{
 
             channel = await connection.createChannel();
 
-            await channel.assertQueue("video", {durable: true});
-            await channel.assertQueue("votes", {durable: true});
+            await channel.assertQueue("vote", {durable: true});
             
             console.log("connection works")
             return channel;

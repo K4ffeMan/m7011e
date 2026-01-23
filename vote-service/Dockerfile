@@ -8,4 +8,4 @@ COPY . .
 
 RUN npm run build
 
-CMD ["node", "dist/rooms.js"]
+CMD ["node", "dist/vote.js"]

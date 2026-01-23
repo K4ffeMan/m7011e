@@ -10,7 +10,7 @@ services:
     ports:
       - "5173:3000"
     depends_on:
-      - room
+      - backend
     networks:
       - app-network
   postgres:
@@ -26,6 +26,19 @@ services:
     networks:
       - app-network
 
+  backend:
+    build: ./backend
+    command: node dist/server.js
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
   room:
     build: ./room-service
     command: node dist/rooms.js
@@ -33,6 +46,58 @@ services:
       - "5001:5001"
     env_file:
       - ./room-service/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  video:
+    build: ./video-service
+    command: node dist/videos.js
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./video-service/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  start-vote:
+    build: ./start-vote-service
+    command: node dist/start.js
+    ports:
+      - "5003:5003"
+    env_file:
+      - ./start-vote-service/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  vote:
+    build: ./vote-service
+    command: node dist/vote.js
+    ports:
+      - "5004:5004"
+    env_file:
+      - ./vote-service/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+  
+  end-vote:
+    build: ./end-vote-service
+    command: node dist/end.js
+    ports:
+      - "5005:5005"
+    env_file:
+      - ./end-vote-service/.env
     depends_on:
       - postgres
     restart: unless-stopped
@@ -55,7 +120,27 @@ services:
     networks:
       - app-network
 
+  video-worker:
+    build: ./video-rabbitmq
+    command: node dist/rabbitmq.js
+    env_file:
+      - ./video-rabbitmq/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
 
+  vote-worker:
+    build: ./vote-rabbitmq
+    command: node dist/rabbitmq.js
+    env_file:
+      - ./vote-rabbitmq/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
 
 volumes:
   pgdata:

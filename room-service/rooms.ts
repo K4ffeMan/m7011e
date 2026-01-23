@@ -61,9 +61,21 @@ app.get("/metrics", async(_req, res) =>{
   res.end(await client.register.metrics());
 })
 
+async function connectDatabase() {
+  try{
+    await testConnection();
+
+    console.log("database working")
+  }catch(err){
+    console.log("Database is not working")
+  }
+}
+
+connectDatabase();
+
 const router = Router();
 
-app.use("/api/rooms", router);
+app.use("/", router);
 
 router.get("/:roomId", async (req: Request, res: Response) => {
   try{
@@ -128,38 +140,24 @@ router.post("/", authtest, async (req: Request, res: Response) => {
   }
 });
 
-  router.delete("/:roomId", authtest, async (req: Request, res: Response) => {
+router.delete("/:roomId", authtest, async (req: Request, res: Response) => {
     const { roomId } = req.params;
     const roles = req.auth?.realm_access?.roles;
     const Admin = roles?.includes("admin");
 
 
     if(!Admin){
-      return res.status(403).json({ error: "You need to be admin" });
+        return res.status(403).json({ error: "You need to be admin" });
     }
 
     await pool.query(
-      "DELETE FROM watch.rooms WHERE id = $1",
-      [roomId]
+        "DELETE FROM watch.rooms WHERE id = $1",
+        [roomId]
     )
     res.status(200).json({
-      success: true
+        success: true
     })
 });
-
-export default router;
-
-async function connectDatabase() {
-  try{
-    await testConnection();
-
-    console.log("database working")
-  }catch(err){
-    console.log("Database is not working")
-  }
-}
-
-connectDatabase();
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
