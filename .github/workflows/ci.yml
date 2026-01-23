@@ -99,9 +99,15 @@ jobs:
           echo "DB_PASSWORD=group7password" >> vote-rabbitmq/.env
           echo "DB_NAME=mydatabase" >> vote-rabbitmq/.env
           echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> vote-rabbitmq/.env
+
       - name: start docker compose
         run: |
           docker compose up -d --build
+
+      - name: Docker status
+        run: |
+          docker compose ps
+          docker ps -a
       
       - name: Wait for docker to finish up
         run: | 
