@@ -32,7 +32,7 @@ jobs:
     needs: lint
     env:
       BASE_URL: http://localhost:5000
-      DB_HOST: localhost
+      DB_HOST: Postgres
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: pass
@@ -42,6 +42,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create .env file for backend
+        run: |
+          echo "DB_HOST=postgres" > backend/.env
+          echo "DB_PORT=5432" >> backend/.env
+          echo "DB_USER=postgres" >> backend/.env
+          echo "DB_PASSWORD=group7password" >> backend/.env
+          echo "DB_NAME=mydatabase" >> backend/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> backend/.env
+      - name: Create .env file for room-service
+        run: |
+          echo "DB_HOST=postgres" > room-service/.env
+          echo "DB_PORT=5432" >> room-service/.env
+          echo "DB_USER=postgres" >> room-service/.env
+          echo "DB_PASSWORD=group7password" >> room-service/.env
+          echo "DB_NAME=mydatabase" >> room-service/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> room-service/.env
+      - name: Create .env file for video-service
+        run: |
+          echo "DB_HOST=postgres" > video-service/.env
+          echo "DB_PORT=5432" >> video-service/.env
+          echo "DB_USER=postgres" >> video-service/.env
+          echo "DB_PASSWORD=group7password" >> video-service/.env
+          echo "DB_NAME=mydatabase" >> video-service/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> video-service/.env
+      - name: Create .env file for start-vote-service
+        run: |
+          echo "DB_HOST=postgres" > start-vote-service/.env
+          echo "DB_PORT=5432" >> start-vote-service/.env
+          echo "DB_USER=postgres" >> start-vote-service/.env
+          echo "DB_PASSWORD=group7password" >> start-vote-service/.env
+          echo "DB_NAME=mydatabase" >> start-vote-service/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> start-vote-service/.env
+      - name: Create .env file for vote
+        run: |
+          echo "DB_HOST=postgres" > vote-service/.env
+          echo "DB_PORT=5432" >> vote-service/.env
+          echo "DB_USER=postgres" >>  vote-service/.env
+          echo "DB_PASSWORD=group7password" >> vote-service/.env
+          echo "DB_NAME=mydatabase" >> vote-service/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> vote-service/.env
+
+      - name: Create .env file for end-vote-service
+        run: |
+          echo "DB_HOST=postgres" > end-vote-service/.env
+          echo "DB_PORT=5432" >> end-vote-service/.env
+          echo "DB_USER=postgres" >>  end-vote-service/.env
+          echo "DB_PASSWORD=group7password" >> end-vote-service/.env
+          echo "DB_NAME=mydatabase" >> end-vote-service/.env
+          echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> end-vote-service/.env
       - name: start docker compose
         run: |
           docker compose up -d --build
