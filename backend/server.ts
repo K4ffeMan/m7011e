@@ -27,31 +27,35 @@ const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004"
 
 // Middleware
 app.use(cors({
-  origin: true,
+  origin: ["https://frontend-dev.ltu-m7011e-7.se"],
   credentials: true,
 }));
 app.options("*", cors())
-console.log("Does it get here")
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
   changeOrigin: true,
+  xfwd: true,
 }));
 app.use("/api/videos", createProxyMiddleware({
   target: video_service_url,
   changeOrigin: true,
+  xfwd: true,
 }));
 app.use("/api/vote/start", createProxyMiddleware({
   target: start_vote_service_url,
   changeOrigin: true,
+  xfwd: true,
 }));
 app.use("/api/vote/end", createProxyMiddleware({
   target: end_vote_service_url,
   changeOrigin: true,
+  xfwd: true,
 }));
 app.use("/api/vote", createProxyMiddleware({
   target: vote_service_url,
   changeOrigin: true,
+  xfwd: true,
 }));
 
 
