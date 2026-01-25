@@ -42,6 +42,11 @@ jobs:
           echo "DB_PASSWORD=group7password" >> backend/.env
           echo "DB_NAME=mydatabase" >> backend/.env
           echo "AMQP_URL=amqp://admin:adminpass@rabbitmq:5672" >> backend/.env
+          echo "ROOM_SERVICE_URL=http://room:5001" >> backend/.env
+          echo "VIDEO_SERVICE_URL=http://video:5002" >> backend/.env
+          echo "START_VOTE_SERVICE_URL=http://start-vote:5003" >> backend/.env
+          echo "END_VOTE_SERVICE_URL=http://end-vote:5005" >> backend/.env
+          echo "VOTE_SERVICE_URL=http://vote:5004" >> backend/.env
       - name: Create .env file for room-service
         run: |
           echo "DB_HOST=postgres" > room-service/.env
