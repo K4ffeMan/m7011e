@@ -31,14 +31,6 @@ app.use(cors({
   credentials: true,
 }));
 app.options("*", cors())
-
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS"){
-    res.sendStatus(204);
-    return;
-  }
-  next();
-})
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
