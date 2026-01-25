@@ -25,9 +25,7 @@ const request_duration = new client.Histogram({
 
 // Middleware
 app.use(cors({
-  origin: ["https://frontend-dev.ltu-m7011e-7.se"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  origin: true,
   credentials: true,
 }));
 app.options("*", cors())
