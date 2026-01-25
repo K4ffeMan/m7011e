@@ -28,6 +28,8 @@ const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004"
 // Middleware
 app.use(cors({
   origin: ["https://frontend-dev.ltu-m7011e-7.se"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
 app.options("*", cors())
