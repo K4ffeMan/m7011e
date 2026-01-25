@@ -19,6 +19,12 @@ async function initdatabase() {
 
 initdatabase();
 
+const room_service_url = process.env.ROOM_SERVICE_URL || "http://localhost:5001";
+const video_service_url = process.env.VIDEO_SERVICE_URL || "http://localhost:5002";
+const start_vote_service_url = process.env.START_VOTE_SERVICE_URL || "http://localhost:5003";
+const end_vote_service_url = process.env.END_VOTE_SERVICE_URL || "http://localhost:5005";
+const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004";
+
 // Middleware
 app.use(cors({
   origin: true,
@@ -28,23 +34,23 @@ app.options("*", cors())
 console.log("Does it get here")
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
-  target: "http://room:5001",
+  target: room_service_url,
   changeOrigin: true,
 }));
 app.use("/api/videos", createProxyMiddleware({
-  target: "http://video:5002",
+  target: video_service_url,
   changeOrigin: true,
 }));
 app.use("/api/vote/start", createProxyMiddleware({
-  target: "http://start-vote:5003",
+  target: start_vote_service_url,
   changeOrigin: true,
 }));
 app.use("/api/vote/end", createProxyMiddleware({
-  target: "http://end-vote:5005",
+  target: end_vote_service_url,
   changeOrigin: true,
 }));
 app.use("/api/vote", createProxyMiddleware({
-  target: "http://vote:5004",
+  target: vote_service_url,
   changeOrigin: true,
 }));
 
