@@ -26,11 +26,12 @@ const end_vote_service_url = process.env.END_VOTE_SERVICE_URL || "http://localho
 const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004";
 
 // Middleware
-app.use(cors({
+const corsMiddle = cors({
   origin: true,
   credentials: true,
-}));
-app.options("*", cors())
+});
+app.use(corsMiddle);
+app.options("*", corsMiddle);
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
