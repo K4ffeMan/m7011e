@@ -5,10 +5,6 @@ import { createTablesWatch, testConnection } from "./db/database";
 
 const app = express();
 const PORT = 5000;
-app.use((req, res, next) => {
-  console.log(`Gateway received: ${req.method} ${req.url}`);
-  next();
-});
 
 async function initdatabase() {
   try{
@@ -31,40 +27,30 @@ const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004"
 
 // Middleware
 app.use(cors({
-  origin: "https://frontend-dev.ltu-m7011e-7.se",
+  origin: true,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.options('*', cors());
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
   changeOrigin: true,
-  pathRewrite: {
-    '^/api/rooms': '/',
-  },
-  xfwd: true,
 }));
 app.use("/api/videos", createProxyMiddleware({
   target: video_service_url,
   changeOrigin: true,
-  xfwd: true,
 }));
 app.use("/api/vote/start", createProxyMiddleware({
   target: start_vote_service_url,
   changeOrigin: true,
-  xfwd: true,
 }));
 app.use("/api/vote/end", createProxyMiddleware({
   target: end_vote_service_url,
   changeOrigin: true,
-  xfwd: true,
 }));
 app.use("/api/vote", createProxyMiddleware({
   target: vote_service_url,
   changeOrigin: true,
-  xfwd: true,
 }));
 
 

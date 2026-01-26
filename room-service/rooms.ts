@@ -6,11 +6,6 @@ import { pool, testConnection } from "./database";
 
 const app = express();
 const PORT = 5001;
-app.use((req, res, next) => {
-  console.log(`we got to room-service Method: ${req.method} Path: ${req.path}`);
-  console.log(`the auth header: ${!!req.headers.authorization}`);
-  next();
-});
 
 client.collectDefaultMetrics();
 
