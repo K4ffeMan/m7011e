@@ -26,19 +26,12 @@ const end_vote_service_url = process.env.END_VOTE_SERVICE_URL || "http://localho
 const vote_service_url = process.env.VOTE_SERVICE_URL || "http://localhost:5004";
 
 // Middleware
-const corsMiddle = cors({
-  origin: true,
+app.use(cors({
+  origin: "https://frontend-dev.ltu-m7011e-7.se",
   credentials: true,
-});
-app.use(corsMiddle);
-app.options("*", corsMiddle);
-app.use((req, res, next) => {
-  if(req.method === "OPTION"){
-    res.sendStatus(204);
-    return;
-  }
-  next();
-});
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
