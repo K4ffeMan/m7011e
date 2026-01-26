@@ -110,7 +110,7 @@ router.get("/:roomId", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try{
-    const userId = req.auth?.sub;
+    const userId = "test";
     const roomId = Math.random().toString(36).substring(2, 8);
     
     await pool.query(
