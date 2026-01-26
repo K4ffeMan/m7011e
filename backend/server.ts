@@ -36,6 +36,9 @@ app.use(cors({
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
   changeOrigin: true,
+  pathRewrite: {
+    '^/api/rooms': '',
+  },
   xfwd: true,
 }));
 app.use("/api/videos", createProxyMiddleware({

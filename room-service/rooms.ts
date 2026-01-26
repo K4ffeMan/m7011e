@@ -1,5 +1,4 @@
 import bodyParser from "body-parser";
-import cors from "cors";
 import express, { Request, Response, Router } from "express";
 import client from "prom-client";
 import { authtest } from "./auth/jwtAuth";
@@ -23,12 +22,6 @@ const request_duration = new client.Histogram({
   buckets: [0.05, 0.1, 0.25, 0.5, 1]
 })
 
-// Middleware
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
-app.options("*", cors())
 app.use(bodyParser.json());
 
 app.use((req, res, next)=>{
