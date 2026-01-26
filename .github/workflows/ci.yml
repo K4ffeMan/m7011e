@@ -248,6 +248,32 @@ jobs:
         run: |
           docker push ghcr.io/k4ffeman/video-service:latest
 
+  docker-video-rabbitmq:
+    name: Build & push video-rabbitmq Docker image
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build video-rabbitmq image
+        run: |
+          docker build \
+            -t ghcr.io/k4ffeman/video-rabbitmq:latest \
+            ./video-rabbitmq
+
+      - name: Push video-rabbitmq image
+        run: |
+          docker push ghcr.io/k4ffeman/video-rabbitmq:latest
+
   docker-start-vote-service:
     name: Build & push start-vote-service Docker image
     runs-on: ubuntu-latest
@@ -299,6 +325,31 @@ jobs:
       - name: Push vote-service image
         run: |
           docker push ghcr.io/k4ffeman/vote-service:latest
+
+  docker-vote-rabbitmq:
+    name: Build & push vote-rabbitmq Docker image
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build vote-rabbitmq image
+        run: |
+          docker build \
+            -t ghcr.io/k4ffeman/vote-rabbitmq:latest \
+            ./vote-rabbitmq
+      - name: Push vote-rabbitmq image
+        run: |
+          docker push ghcr.io/k4ffeman/vote-rabbitmq:latest
 
   docker-end-vote-service:
     name: Build & push end-vote-service Docker image
