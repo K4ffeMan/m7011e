@@ -116,7 +116,7 @@ jobs:
       - name: Wait for docker to finish up
         run: | 
           for i in {1..50}; do
-            if curl -sSf -X POST http://localhost:5000/api/rooms/; then
+            if curl -sSf -X POST http://localhost:5000/api/rooms/ -H "X-Test-Mode: true"; then
               echo "All ready"
               exit 0
             fi

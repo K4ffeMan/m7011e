@@ -32,6 +32,13 @@ const corsMiddle = cors({
 });
 app.use(corsMiddle);
 app.options("*", corsMiddle);
+app.use((req, res, next) => {
+  if(req.method === "OPTION"){
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
 // Routes
 app.use("/api/rooms", createProxyMiddleware({
   target: room_service_url,
