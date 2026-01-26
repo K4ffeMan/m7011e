@@ -41,7 +41,7 @@ const [alertSeverity, setAlertSeverity] = useState<
     
     try {
       
-      const res = await keyaxios.post(`/api/rooms/`);
+      const res = await keyaxios.post(`/api/rooms`);
       if (res.data.success) {
         navigate(`/room/${res.data.roomId}`);
       }
